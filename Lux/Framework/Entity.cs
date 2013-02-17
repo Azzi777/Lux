@@ -202,7 +202,7 @@ namespace Lux.Framework
             ForceAccumulator = Vector3.Zero;
             TorqueAccumulator = Vector3.Zero;
 
-            CalculateTransformMatrix();
+            //CalculateTransformMatrix();
         }
     }
 }
