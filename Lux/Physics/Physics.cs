@@ -9,6 +9,7 @@ namespace Lux.Physics
 {
     /// <summary>
     /// The physics engine.
+    /// (This documentation should be elaborated.)
     /// </summary>
     public class PhysicsEngine
     {
