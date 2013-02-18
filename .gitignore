@@ -33,6 +33,10 @@ $tf*/
 [Bb]in/
 [Oo]bj/
 
+
+# Model files
+!sponza.obj
+
 # mstest test results
 TestResults
 
