@@ -16,8 +16,11 @@ namespace Test
 
             Engine engine = new Engine();
 
-			engine.Physics.AddGlobalForceGenerator(new Gravity());
-            engine.CreateEntity("ent.obj", "ent.phys");
+			Entity ent1 = engine.CreateEntity("ent.obj", "ent.phys");
+			Entity ent2 = engine.CreateEntity("ent.obj", "ent.phys");
+
+			engine.Physics.AddForceGenerator(new Force1(), ent1);
+			engine.Physics.AddForceGenerator(new Force2(), ent2);
             engine.Run();
 
             while (true) ;
