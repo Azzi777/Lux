@@ -60,6 +60,7 @@ namespace Lux.Framework
 
             Entities = new List<Entity>();
             EntityFinalizeQueue = new Queue<KeyValuePair<Entity, string>>();
+            //testetsetset
         }
 
         /// <summary>
