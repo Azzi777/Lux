@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,12 +34,13 @@ namespace Lux.Graphics
 
 		internal void SetupRender()
 		{
-			RenderContext = new GraphicsContext(GraphicsMode.Default, Parent.Window.WindowInfo, 1, 0, GraphicsContextFlags.Default);
+			RenderContext = new GraphicsContext(new GraphicsMode(32, 24, 8, 16), Parent.Window.WindowInfo, 1, 0, GraphicsContextFlags.Default);
 			RenderContext.MakeCurrent(Parent.Window.WindowInfo);
 			Parent.Window.Visible = true;
 
+			GL.Enable(EnableCap.Multisample);
 			GL.Enable(EnableCap.DepthTest);
-			GL.ClearColor(Color.CornflowerBlue);
+			GL.ClearColor(Color4.CornflowerBlue);
 
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
@@ -57,7 +57,12 @@ namespace Lux.Graphics
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraLookat.OpenTKEquivalent, 1.0F));
+			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraPosition.OpenTKEquivalent, 100.0F));
+			GL.Light(LightName.Light0, LightParameter.Specular, Color4.White);
+			GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
+			GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
+
+			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Back);

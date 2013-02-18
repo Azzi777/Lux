@@ -14,24 +14,24 @@ namespace Lux.Graphics
 	{
 		Mesh[] Meshes;
 
-		//static public Model UnitCube
-		//{
-		//	get
-		//	{
-		//		return new Model(new Mesh[] { Mesh.UnitCube });
-		//	}
-		//}
+		uint VertexBufferID;
+		uint NormalBufferID;
+		uint TextureBufferID;
 
-		//static public Model UnitIcosahedron
-		//{
-		//	get
-		//	{
-		//		return new Model(new Mesh[] { Mesh.UnitIcosahedron });
-		//	}
-		//}
-
-		public Model(Mesh[] meshes)
+		public Model(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, Mesh[] meshes)
 		{
+			GL.GenBuffers(1, out VertexBufferID);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * MeshVertex.GetSize()), vertices, BufferUsageHint.StaticDraw);
+
+			GL.GenBuffers(1, out NormalBufferID);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(normals.Length * MeshNormal.GetSize()), normals, BufferUsageHint.StaticDraw);
+
+			GL.GenBuffers(1, out TextureBufferID);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(texCoords.Length * MeshTexCoord.GetSize()), texCoords, BufferUsageHint.StaticDraw);
+
 			Meshes = meshes;
 		}
 
@@ -45,10 +45,28 @@ namespace Lux.Graphics
 			OpenTK.Graphics.OpenGL.GL.MatrixMode(OpenTK.Graphics.OpenGL.MatrixMode.Modelview);
 			OpenTK.Graphics.OpenGL.GL.MultMatrix(entity.TransformMatrix.Data);
 
+			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
+			GL.EnableClientState(ArrayCap.VertexArray);
+			GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
+
+			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
+			GL.EnableClientState(ArrayCap.NormalArray);
+			GL.NormalPointer(NormalPointerType.Float, MeshNormal.GetSize(), 0);
+
+			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
+			GL.EnableClientState(ArrayCap.TextureCoordArray);
+			GL.TexCoordPointer(2, TexCoordPointerType.Float, MeshTexCoord.GetSize(), 0);
+
 			foreach (Mesh m in Meshes)
 			{
 				m.Render();
 			}
+
+			GL.DisableClientState(ArrayCap.VertexArray);
+			GL.DisableClientState(ArrayCap.NormalArray);
+			GL.DisableClientState(ArrayCap.TextureCoordArray);
+
+			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		}
 	}
 }

@@ -81,6 +81,8 @@ namespace Lux.Framework
 
 		private void Update()
 		{
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
 			Stopwatch timer = new Stopwatch();
 			Stopwatch framerate = new Stopwatch();
 			framerate.Start();
@@ -100,10 +102,12 @@ namespace Lux.Framework
 
 		private void Render()
 		{
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
 			Window = new NativeWindow(1024, 768, "Game Engine", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default);
 			Window.Closing += WindowClosing;
 			Graphics.SetupRender();
-			
+
 			Stopwatch timer = new Stopwatch();
 			Stopwatch framerate = new Stopwatch();
 			framerate.Start();

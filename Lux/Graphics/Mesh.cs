@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace Lux.Graphics
@@ -12,48 +12,51 @@ namespace Lux.Graphics
 	{
 		int VertexCount;
 		uint IndexBufferID;
-		uint VertexBufferID;
-		uint NormalBufferID;
-		uint TextureBufferID;
 
-		public Mesh(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, uint[] indices)
+		public Color4 AmbientColor;
+		public Color4 DiffuseColor;
+		public Color4 EmissiveColor;
+		public Color4 SpecularColor;
+		public float SpecularCoefficient;
+		public float Transparency;
+		public float ReflectionIndex;
+
+		public Texture AmbientTexture;
+		public Texture DiffuseTexture;
+		public Texture AlphaTexture;
+		public Texture BumpMapTexture;
+
+		public Mesh(uint[] indices)
 		{
-			GL.GenBuffers(1, out VertexBufferID);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * MeshVertex.GetSize()), vertices, BufferUsageHint.StaticDraw);
-
-			GL.GenBuffers(1, out NormalBufferID);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(normals.Length * MeshNormal.GetSize()), normals, BufferUsageHint.StaticDraw);
-
-			GL.GenBuffers(1, out TextureBufferID);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(texCoords.Length * MeshTexCoord.GetSize()), texCoords, BufferUsageHint.StaticDraw);
-
 			GL.GenBuffers(1, out IndexBufferID);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
 			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(uint)), indices, BufferUsageHint.StaticDraw);
 
 			VertexCount = indices.Length;
+
+			AmbientColor = Color4.White;
+			DiffuseColor = Color4.White;
+			EmissiveColor = Color4.White;
+			SpecularColor = Color4.White;
+			Transparency = 0.0F;
+			SpecularCoefficient = 10.0F;
+			ReflectionIndex = 1.5F;
 		}
 
 		public void Render()
 		{
-			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
+			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Ambient, AmbientColor);
+			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Diffuse, DiffuseColor);
+			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Emission, EmissiveColor);
+			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Specular, SpecularColor);
+			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Shininess, SpecularCoefficient);
 
-			GL.EnableClientState(ArrayCap.ColorArray);
-			GL.ColorPointer(3, ColorPointerType.Float, MeshVertex.GetSize(), 12);
+			if (AmbientTexture != null)
+			{
+				GL.Enable(EnableCap.Texture2D);
+				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
+			}
 
-			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
-			GL.EnableClientState(ArrayCap.NormalArray);
-			GL.NormalPointer(NormalPointerType.Float, MeshNormal.GetSize(), 0);
-
-			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
-			GL.EnableClientState(ArrayCap.TextureCoordArray);
-			GL.TexCoordPointer(2, TexCoordPointerType.Float, MeshTexCoord.GetSize(), 0);
-			
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
 			GL.EnableClientState(ArrayCap.IndexArray);
 			GL.IndexPointer(IndexPointerType.Int, sizeof(uint), 0);
@@ -61,13 +64,28 @@ namespace Lux.Graphics
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
 			GL.DisableClientState(ArrayCap.IndexArray);
-			
-			GL.DisableClientState(ArrayCap.VertexArray);
-			GL.DisableClientState(ArrayCap.ColorArray);
-			GL.DisableClientState(ArrayCap.NormalArray);
-			GL.DisableClientState(ArrayCap.TextureCoordArray);
 
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+			GL.Disable(EnableCap.Texture2D);
+		}
+
+		public void LoadAmbientTexture(string path)
+		{
+			AmbientTexture = new Texture(path);
+		}
+
+		public void LoadDiffuseTexture(string path)
+		{
+			DiffuseTexture = new Texture(path);
+		}
+
+		public void LoadAlphaTexture(string path)
+		{
+			AlphaTexture = new Texture(path);
+		}
+
+		public void LoadBumpMapTexture(string path)
+		{
+			BumpMapTexture = new Texture(path);
 		}
 	}
 
@@ -76,33 +94,17 @@ namespace Lux.Graphics
 		float X;
 		float Y;
 		float Z;
-		float R;
-		float G;
-		float B;
 
-		public MeshVertex(float x, float y, float z, float r, float g, float b)
+		public MeshVertex(float x, float y, float z)
 		{
 			X = x;
 			Y = y;
 			Z = z;
-			R = r;
-			G = g;
-			B = b;
-		}
-
-		public MeshVertex(float x, float y, float z, Color c)
-		{
-			X = x;
-			Y = y;
-			Z = z;
-			R = (float)c.R / 255;
-			G = (float)c.G / 255;
-			B = (float)c.B / 255;
 		}
 
 		static public int GetSize()
 		{
-			return 6 * sizeof(float);
+			return 3 * sizeof(float);
 		}
 	}
 
