@@ -62,7 +62,7 @@ namespace Lux.Framework
             }
             else
             {
-                OpenTKEquivalent = new Quaterniond(scaledAxis.Normalized.OpenTKEquivalent, scaledAxis.Length);
+				OpenTKEquivalent = Quaterniond.FromAxisAngle(scaledAxis.Normalized.OpenTKEquivalent, scaledAxis.Length);
             }
         }
 
@@ -71,7 +71,7 @@ namespace Lux.Framework
         /// </summary>
         /// <param name="axis">The vector axis around which to turn.</param>
         /// <param name="angle">The angle to turn.</param>
-        public Quaternion(double angle, Vector3 axis)
+        public Quaternion(Vector3 axis, double angle)
             : this()
         {
             OpenTKEquivalent = Quaterniond.FromAxisAngle(axis.OpenTKEquivalent, angle);
@@ -112,7 +112,8 @@ namespace Lux.Framework
         /// <returns>A new quaternion representing the combined rotation.</returns>
         static public Quaternion operator *(Quaternion quat1, Quaternion quat2)
         {
-            return new Quaternion(quat1.OpenTKEquivalent * quat2.OpenTKEquivalent);
+			return new Quaternion(Quaterniond.Multiply(quat1.OpenTKEquivalent, quat2.OpenTKEquivalent));
+            //return new Quaternion(quat1.OpenTKEquivalent * quat2.OpenTKEquivalent);
         }
 
         /// <summary>

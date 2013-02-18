@@ -146,9 +146,9 @@ namespace Lux.Framework
         #endregion
 
         private void CalculateTransformMatrix()
-        {
-            TransformMatrix = Matrix4.CreateTranslation(Position);
-            TransformMatrix.Rotate(Orientation);
+		{
+			TransformMatrix = Matrix4.CreateRotation(Orientation);
+            TransformMatrix *= Matrix4.CreateTranslation(Position);
         }
 
         /// <summary>
@@ -188,18 +188,19 @@ namespace Lux.Framework
         internal void Integrate(double deltaTime)
         {
             Vector3 Acceleration = ForceAccumulator * InverseMass;
+			Velocity += Acceleration * deltaTime;
 
-            Velocity += Acceleration * deltaTime;
+			Position += Velocity * deltaTime;
+
+			ForceAccumulator = Vector3.Zero;
 
             Vector3 AngularAcceleration = InertiaTensor.Transform(TorqueAccumulator);
-            AngularVelocity *= new Quaternion(AngularAcceleration * deltaTime);
+			AngularVelocity *= new Quaternion(AngularAcceleration * deltaTime);
+			AngularVelocity.Normalize();
 
-            Position += Velocity * deltaTime;
-
-            Orientation *= AngularVelocity * deltaTime;
+			Orientation *= AngularVelocity;
             Orientation.Normalize();
 
-            ForceAccumulator = Vector3.Zero;
             TorqueAccumulator = Vector3.Zero;
 
             CalculateTransformMatrix();
