@@ -11,144 +11,144 @@ using Lux.Physics;
 
 namespace Lux.Framework
 {
-    /// <summary>
-    /// The main engine class.
-    /// </summary>
-    public class Engine
-    {
-        /// <summary>
-        /// Loads the external resources and dependencies. Necessary in order to use Lux.
-        /// </summary>
-        static public void LoadDependencies()
-        {
-            InternalLibraryLinker.LoadDLLs();
-        }
+	/// <summary>
+	/// The main engine class.
+	/// </summary>
+	public class Engine
+	{
+		/// <summary>
+		/// Loads the external resources and dependencies. Necessary in order to use Lux.
+		/// </summary>
+		static public void LoadDependencies()
+		{
+			InternalLibraryLinker.LoadDLLs();
+		}
 
-        /// <summary>
-        /// The game stage currently being executed
-        /// </summary>
-        public IStage Stage { get; private set; }
+		/// <summary>
+		/// The game stage currently being executed
+		/// </summary>
+		public IStage Stage { get; private set; }
 
-        /// <summary>
-        /// The physics part of the engine
-        /// </summary>
-        public PhysicsEngine Physics { get; private set; }
+		/// <summary>
+		/// The physics part of the engine
+		/// </summary>
+		public PhysicsEngine Physics { get; private set; }
 
-        /// <summary>
-        /// The graphics part of the engine
-        /// </summary>
-        public GraphicsEngine Graphics { get; private set; }
+		/// <summary>
+		/// The graphics part of the engine
+		/// </summary>
+		public GraphicsEngine Graphics { get; private set; }
 
-        internal Queue<KeyValuePair<Entity, string>> EntityFinalizeQueue;
-        internal List<Entity> Entities;
-        internal NativeWindow Window;
-        private Thread UpdateThread;
-        private Thread RenderThread;
-        public int UpdateRate { get; private set; }
-        public int RenderRate { get; private set; }
+		internal Queue<KeyValuePair<Entity, string>> EntityFinalizeQueue;
+		internal List<Entity> Entities;
+		internal NativeWindow Window;
+		private Thread UpdateThread;
+		private Thread RenderThread;
+		public int UpdateRate { get; private set; }
+		public int RenderRate { get; private set; }
 
-        /// <summary>
-        /// Creates a new instance of the Engine class
-        /// </summary>
-        public Engine()
-        {
-            UpdateThread = new Thread(new ThreadStart(Update));
-            RenderThread = new Thread(new ThreadStart(Render));
+		/// <summary>
+		/// Creates a new instance of the Engine class
+		/// </summary>
+		public Engine()
+		{
+			UpdateThread = new Thread(new ThreadStart(Update));
+			RenderThread = new Thread(new ThreadStart(Render));
 
-            Physics = new PhysicsEngine(this);
-            Graphics = new GraphicsEngine(this);
+			Physics = new PhysicsEngine(this);
+			Graphics = new GraphicsEngine(this);
 
-            Entities = new List<Entity>();
-            EntityFinalizeQueue = new Queue<KeyValuePair<Entity, string>>();
-        }
+			Entities = new List<Entity>();
+			EntityFinalizeQueue = new Queue<KeyValuePair<Entity, string>>();
+		}
 
-        /// <summary>
-        /// Starts the egnine
-        /// </summary>
-        /// <param name="updaterate">The number of updates per second (default 60)</param>
-        /// <param name="framerate">The number of frames per seconed (default 60)</param>
-        public void Run(int updaterate = 60, int renderrate = 60)
-        {
-            UpdateRate = updaterate;
-            RenderRate = renderrate;
-            UpdateThread.Start();
-            RenderThread.Start();
-        }
+		/// <summary>
+		/// Starts the egnine
+		/// </summary>
+		/// <param name="updaterate">The number of updates per second (default 60)</param>
+		/// <param name="framerate">The number of frames per seconed (default 60)</param>
+		public void Run(int updaterate = 60, int renderrate = 60)
+		{
+			UpdateRate = updaterate;
+			RenderRate = renderrate;
+			UpdateThread.Start();
+			RenderThread.Start();
+		}
 
-        private void Update()
-        {
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
-            while (true)
-            {
-                if (timer.ElapsedMilliseconds < (1.0 / UpdateRate) * 1000)
-                {
-                    continue;
-                }
+		private void Update()
+		{
+			Stopwatch timer = new Stopwatch();
+			timer.Start();
+			while (true)
+			{
+				if (timer.ElapsedMilliseconds < (1.0 / UpdateRate) * 1000)
+				{
+					continue;
+				}
 
-                Physics.Update(timer.Elapsed.TotalSeconds);
+				Physics.Update(timer.Elapsed.TotalSeconds);
 
-                timer.Restart();
-            }
-        }
+				timer.Restart();
+			}
+		}
 
-        private void Render()
-        {
-            Window = new NativeWindow(1024, 768, "Game Engine", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default);
-            Window.Closing += WindowClosing;
-            Graphics.SetupRender();
+		private void Render()
+		{
+			Window = new NativeWindow(1024, 768, "Game Engine", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default);
+			Window.Closing += WindowClosing;
+			Graphics.SetupRender();
 
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
-            while (true)
-            {
-                Monitor.Enter(EntityFinalizeQueue);
-                while(EntityFinalizeQueue.Count > 0)
-                {
-                    Monitor.Enter(Entities);
+			Stopwatch timer = new Stopwatch();
+			timer.Start();
+			while (true)
+			{
+				Monitor.Enter(EntityFinalizeQueue);
+				while (EntityFinalizeQueue.Count > 0)
+				{
+					Monitor.Enter(Entities);
 
-                    KeyValuePair<Entity, string> entity = EntityFinalizeQueue.Dequeue();
-                    entity.Key.Finalize(entity.Value);
-                    Entities.Add(entity.Key);
+					KeyValuePair<Entity, string> entity = EntityFinalizeQueue.Dequeue();
+					entity.Key.Finalize(entity.Value);
+					Entities.Add(entity.Key);
 
-                    Monitor.Exit(Entities);
-                }
-                Monitor.Exit(EntityFinalizeQueue);
+					Monitor.Exit(Entities);
+				}
+				Monitor.Exit(EntityFinalizeQueue);
 
-                if (timer.ElapsedMilliseconds < (1.0 / RenderRate) * 1000)
-                {
-                    continue;
-                }
+				if (timer.ElapsedMilliseconds < (1.0 / RenderRate) * 1000)
+				{
+					continue;
+				}
 
-                Graphics.Render(timer.Elapsed.TotalSeconds);
+				Graphics.Render(timer.Elapsed.TotalSeconds);
 
-                Window.ProcessEvents();
-                timer.Restart();
-            }
-        }
+				Window.ProcessEvents();
+				timer.Restart();
+			}
+		}
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            UpdateThread.Abort();
-            RenderThread.Abort();
-        }
+		private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			UpdateThread.Abort();
+			RenderThread.Abort();
+		}
 
-        public Entity CreateEntity(string model, string body)
-        {
-            Entity entity = new Entity(body);
-            Monitor.Enter(EntityFinalizeQueue);
-            EntityFinalizeQueue.Enqueue(new KeyValuePair<Entity, string>(entity, model));
-            Monitor.Exit(EntityFinalizeQueue);
+		public Entity CreateEntity(string model, string body)
+		{
+			Entity entity = new Entity(body);
+			Monitor.Enter(EntityFinalizeQueue);
+			EntityFinalizeQueue.Enqueue(new KeyValuePair<Entity, string>(entity, model));
+			Monitor.Exit(EntityFinalizeQueue);
 
-            return entity;
-        }
+			return entity;
+		}
 
-        /// <summary>
-        /// Set the stage to currently be in focus.
-        /// </summary>
-        /// <param name="Stage">The stage to focus</param>
-        public void SetStage(IStage Stage)
-        {
-        }
-    }
+		/// <summary>
+		/// Set the stage to currently be in focus.
+		/// </summary>
+		/// <param name="Stage">The stage to focus</param>
+		public void SetStage(IStage Stage)
+		{
+		}
+	}
 }

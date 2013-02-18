@@ -7,8 +7,8 @@ using Lux.Framework;
 
 namespace Lux.Physics
 {
-    public interface IForceGenerator
-    {
-        void UpdateForce(Entity entity, double deltaTime);
-    }
+	public interface IForceGenerator
+	{
+		void UpdateForce(Entity entity, double deltaTime);
+	}
 }

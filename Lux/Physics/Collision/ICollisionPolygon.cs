@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lux.Physics.Collision
 {
-    internal interface ICollisionPolygon
-    {
-    }
+	internal interface ICollisionPolygon
+	{
+	}
 }

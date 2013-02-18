@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Lux.Framework
 {
-    /// <summary>
-    /// Interface for game stages
-    /// </summary>
-    public interface IStage
-    {
-    }
+	/// <summary>
+	/// Interface for game stages
+	/// </summary>
+	public interface IStage
+	{
+	}
 }

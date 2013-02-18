@@ -7,7 +7,7 @@ using Lux.Framework;
 
 namespace Lux.Physics
 {
-    internal class Body
-    {
-    }
+	internal class Body
+	{
+	}
 }
