@@ -14,8 +14,8 @@ namespace Lux.Graphics
 	public class GraphicsEngine
 	{
 		private Engine Parent;
-		private OpenTK.Matrix4 View;
-		private OpenTK.Matrix4 Projection;
+		private Matrix4d View;
+		private Matrix4d Projection;
 
 		private IGraphicsContext ResourceContext;
 		private INativeWindow ResourceWindow;
@@ -42,24 +42,26 @@ namespace Lux.Graphics
 			GL.Enable(EnableCap.DepthTest);
 			GL.ClearColor(Color.CornflowerBlue);
 
-			View = OpenTK.Matrix4.LookAt(OpenTK.Vector3.One * 3, OpenTK.Vector3.Zero, OpenTK.Vector3.UnitY);
-			Projection = OpenTK.Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 1000.0F);
+			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
+			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 
 			GraphicsContext.Assert();
-			//foreach (Entity entity in Parent.Entities)
-			//{
-			//    entity.Model.Setup();
-			//}
 		}
 
 		internal void Render(double deltaTime)
 		{
 			GraphicsContext.Assert();
-			View = OpenTK.Matrix4.LookAt(OpenTK.Vector3.UnitZ * 30, OpenTK.Vector3.Zero, OpenTK.Vector3.UnitY);
-			Projection = OpenTK.Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 1000.0F);
+			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, Parent.CameraLookat.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
+			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraLookat.OpenTKEquivalent, 1.0F));
+
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Back);
+			GL.Enable(EnableCap.Lighting);
+			GL.Enable(EnableCap.Light0);
 
 			foreach (Entity entity in Parent.Entities)
 			{
@@ -70,6 +72,10 @@ namespace Lux.Graphics
 
 				entity.Model.Render(entity);
 			}
+
+			GL.Disable(EnableCap.Light0);
+			GL.Disable(EnableCap.Lighting);
+			GL.Disable(EnableCap.CullFace);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
 		}

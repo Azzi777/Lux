@@ -64,8 +64,7 @@ namespace Lux.Framework
 			InertiaTensor = Matrix3.Identity;
 			TransformMatrix = Matrix4.Identity;
 
-			//Model = Model.LoadFromFile(modelpath);
-			Model = Model.UnitIcosahedron;
+			Model = Model.LoadFromFile(model);
 		}
 
 		/// <summary>
@@ -85,8 +84,7 @@ namespace Lux.Framework
 
 		internal void Finalize(string modelpath)
 		{
-			//Model = Model.LoadFromFile(modelpath);
-			Model = Model.UnitIcosahedron;
+			Model = Model.LoadFromFile(modelpath);
 		}
 
 		#region Accessor functions

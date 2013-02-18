@@ -46,6 +46,8 @@ namespace Lux.Framework
 		private Thread RenderThread;
 		public int UpdateRate { get; private set; }
 		public int RenderRate { get; private set; }
+		public Vector3 CameraPosition;
+		public Vector3 CameraLookat;
 
 		/// <summary>
 		/// Creates a new instance of the Engine class
@@ -60,6 +62,8 @@ namespace Lux.Framework
 
 			Entities = new List<Entity>();
 			EntityFinalizeQueue = new Queue<KeyValuePair<Entity, string>>();
+			CameraPosition = Vector3.Backwards;
+			CameraPosition = Vector3.Zero;
 		}
 
 		/// <summary>
@@ -78,6 +82,8 @@ namespace Lux.Framework
 		private void Update()
 		{
 			Stopwatch timer = new Stopwatch();
+			Stopwatch framerate = new Stopwatch();
+			framerate.Start();
 			timer.Start();
 			while (true)
 			{
@@ -97,9 +103,13 @@ namespace Lux.Framework
 			Window = new NativeWindow(1024, 768, "Game Engine", GameWindowFlags.Default, GraphicsMode.Default, DisplayDevice.Default);
 			Window.Closing += WindowClosing;
 			Graphics.SetupRender();
-
+			
 			Stopwatch timer = new Stopwatch();
+			Stopwatch framerate = new Stopwatch();
+			framerate.Start();
 			timer.Start();
+
+			uint frames = 0;
 			while (true)
 			{
 				Monitor.Enter(EntityFinalizeQueue);
@@ -124,6 +134,14 @@ namespace Lux.Framework
 
 				Window.ProcessEvents();
 				timer.Restart();
+				frames++;
+
+				if (framerate.ElapsedMilliseconds > 1000)
+				{
+					Console.WriteLine("FPS: " + ((double)frames / framerate.ElapsedMilliseconds * 1000));
+					frames = 0;
+					framerate.Restart();
+				}
 			}
 		}
 

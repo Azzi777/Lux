@@ -10,112 +10,58 @@ namespace Lux.Graphics
 {
 	internal class Mesh
 	{
+		Face[] Faces;
+
 		uint VertexBufferID;
-		uint IndexBufferID;
-		int TriangleCount;
+		uint NormalBufferID;
+		uint TextureBufferID;
 
-		static public Mesh UnitCube
-		{
-			get
-			{
-				return new Mesh(
-					new MeshVertex[]{
-                    new MeshVertex(-1, -1, -1, 0, 0, 0), 
-                    new MeshVertex(-1, -1, +1, 0, 0, 1),
-                    new MeshVertex(-1, +1, -1, 0, 1, 0),
-                    new MeshVertex(-1, +1, +1, 0, 1, 1),
-                    new MeshVertex(+1, -1, -1, 1, 0, 0),
-                    new MeshVertex(+1, -1, +1, 1, 0, 1),
-                    new MeshVertex(+1, +1, -1, 1, 1, 0),
-                    new MeshVertex(+1, +1, +1, 1, 1, 1)},
-					new uint[] { 
-                        0, 2, 6,   6, 4, 0, 
-                        4, 6, 7,   7, 5, 4, 
-                        5, 7, 3,   3, 1, 5, 
-                        1, 3, 2,   2, 0, 1, 
-                        3, 7, 6,   6, 2, 3, 
-                        4, 5, 1,   1, 0, 4 });
-			}
-		}
-
-		static public Mesh UnitIcosahedron
-		{
-			get
-			{
-				float p = 2.0F / ((float)Math.Sqrt(5.0F) + 1.0F);
-
-				return new Mesh(
-					new MeshVertex[]{
-                    new MeshVertex(-1, +p, 0, Color.Red), 
-                    new MeshVertex(+1, +p, 0, Color.Blue),
-                    new MeshVertex(-1, -p, 0, Color.Black),
-                    new MeshVertex(+1, -p, 0, Color.White),
-                    new MeshVertex(-p, 0, +1, Color.Green),
-                    new MeshVertex(+p, 0, +1, Color.Yellow),
-                    new MeshVertex(-p, 0, -1, Color.Brown),
-                    new MeshVertex(+p, 0, -1, Color.Teal),
-                    new MeshVertex(0, +1, +p, Color.Orange),
-                    new MeshVertex(0, +1, -p, Color.Magenta),
-                    new MeshVertex(0, -1, +p, Color.Cyan),
-                    new MeshVertex(0, -1, -p, Color.Chocolate)},
-					new uint[] { 9, 1, 7, 9, 7, 6, 9, 6, 0, 9, 0, 8, 9, 8, 1, 6, 7, 11, 7, 3, 11, 7, 1, 3, 1, 5, 3, 1, 8, 5, 8, 4, 5, 8, 0, 4, 0, 2, 4, 0, 6, 2, 6, 11, 2, 10, 2, 11, 10, 11, 3, 10, 3, 5, 10, 5, 4, 10, 4, 2 });
-			}
-		}
-
-		public Mesh(MeshVertex[] vertices, uint[] indices)
+		public Mesh(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, Face[] faces)
 		{
 			GL.GenBuffers(1, out VertexBufferID);
-			GL.GenBuffers(1, out IndexBufferID);
-
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * MeshVertex.GetSize()), vertices, BufferUsageHint.StaticDraw);
 
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * (vertices.Length == 0 ? 0 : MeshVertex.GetSize())), vertices, BufferUsageHint.StaticDraw);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(uint)), indices.ToArray(), BufferUsageHint.StaticDraw);
+			GL.GenBuffers(1, out NormalBufferID);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(normals.Length * MeshNormal.GetSize()), normals, BufferUsageHint.StaticDraw);
 
-			TriangleCount = indices.Length / 3;
+			GL.GenBuffers(1, out TextureBufferID);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(texCoords.Length * MeshTexCoord.GetSize()), texCoords, BufferUsageHint.StaticDraw);
+
+			Faces = faces;
 		}
-
-		//private MeshVertex[] Vertices;
-		//private uint[] Indices;
-		//public Mesh(MeshVertex[] vertices, uint[] indices)
-		//{
-		//    Vertices = vertices;
-		//    Indices = indices;
-		//}
-
-
-		//public void Setup()
-		//{
-		//    GL.GenBuffers(1, out VertexBufferID);
-		//    GL.GenBuffers(1, out IndexBufferID);
-
-		//    GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-		//    GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-
-		//    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vertices.Length * (Vertices.Length == 0 ? 0 : MeshVertex.GetSize())), Vertices, BufferUsageHint.StaticDraw);
-		//    GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(Indices.Length * sizeof(uint)), Indices.ToArray(), BufferUsageHint.StaticDraw);
-
-		//    TriangleCount = Indices.Length / 3;
-		//}
 
 		public void Render()
 		{
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-
 			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.VertexPointer(3, VertexPointerType.Float, 24, 0);
+			GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
 
 			GL.EnableClientState(ArrayCap.ColorArray);
-			GL.ColorPointer(3, ColorPointerType.Float, 24, 12);
+			GL.ColorPointer(3, ColorPointerType.Float, MeshVertex.GetSize(), 12);
 
-			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Back);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
+			GL.EnableClientState(ArrayCap.NormalArray);
+			GL.NormalPointer(NormalPointerType.Float, MeshNormal.GetSize(), 0);
 
-			GL.DrawElements(BeginMode.Triangles, 3 * TriangleCount, DrawElementsType.UnsignedInt, 0);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
+			GL.EnableClientState(ArrayCap.TextureCoordArray);
+			GL.TexCoordPointer(2, TexCoordPointerType.Float, MeshTexCoord.GetSize(), 0);
 
+
+			foreach (Face face in Faces)
+			{
+				face.Render();
+			}
+			
 			GL.DisableClientState(ArrayCap.VertexArray);
+			GL.DisableClientState(ArrayCap.ColorArray);
+			GL.DisableClientState(ArrayCap.NormalArray);
+			GL.DisableClientState(ArrayCap.TextureCoordArray);
+
+			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		}
 	}
 
@@ -151,6 +97,42 @@ namespace Lux.Graphics
 		static public int GetSize()
 		{
 			return 6 * sizeof(float);
+		}
+	}
+
+	internal struct MeshNormal
+	{
+		float X;
+		float Y;
+		float Z;
+
+		public MeshNormal(float x, float y, float z)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+		}
+
+		static public int GetSize()
+		{
+			return 3 * sizeof(float);
+		}
+	}
+
+	internal struct MeshTexCoord
+	{
+		float X;
+		float Y;
+
+		public MeshTexCoord(float x, float y)
+		{
+			X = x;
+			Y = y;
+		}
+
+		static public int GetSize()
+		{
+			return 2 * sizeof(float);
 		}
 	}
 }

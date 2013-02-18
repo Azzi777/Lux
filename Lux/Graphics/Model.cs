@@ -1,10 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 
 using Lux.Framework;
+using Lux.Resources;
 
 namespace Lux.Graphics
 {
@@ -12,55 +14,37 @@ namespace Lux.Graphics
 	{
 		Mesh[] Meshes;
 
-		static public Model UnitCube
+		//static public Model UnitCube
+		//{
+		//	get
+		//	{
+		//		return new Model(new Mesh[] { Mesh.UnitCube });
+		//	}
+		//}
+
+		//static public Model UnitIcosahedron
+		//{
+		//	get
+		//	{
+		//		return new Model(new Mesh[] { Mesh.UnitIcosahedron });
+		//	}
+		//}
+
+		public Model(Mesh[] meshes)
 		{
-			get
-			{
-				Model m = new Model();
-				m.Meshes = new Mesh[] { Mesh.UnitCube };
-
-				return m;
-			}
-		}
-
-		static public Model UnitIcosahedron
-		{
-			get
-			{
-				Model m = new Model();
-				m.Meshes = new Mesh[] { Mesh.UnitIcosahedron };
-
-				return m;
-			}
+			Meshes = meshes;
 		}
 
 		static public Model LoadFromFile(string path)
 		{
-			Model m = new Model();
-			byte[] fileData = File.ReadAllBytes(path);
-
-			List<Mesh> meshes = new List<Mesh>();
-
-
-			Mesh testMesh = Mesh.UnitCube;
-
-
-			m.Meshes = meshes.ToArray();
-			return m;
+			return ObjLoader.LoadFromFile(path);
 		}
-
-		//public void Setup()
-		//{
-		//    foreach (Mesh m in Meshes)
-		//    {
-		//        m.Setup();
-		//    }
-		//}
 
 		public void Render(Entity entity)
 		{
 			OpenTK.Graphics.OpenGL.GL.MatrixMode(OpenTK.Graphics.OpenGL.MatrixMode.Modelview);
 			OpenTK.Graphics.OpenGL.GL.MultMatrix(entity.TransformMatrix.Data);
+
 			foreach (Mesh m in Meshes)
 			{
 				m.Render();

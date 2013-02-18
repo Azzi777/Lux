@@ -16,14 +16,19 @@ namespace Test
 
 			Engine engine = new Engine();
 
-			Entity ent1 = engine.CreateEntity("ent.obj", "ent.phys");
-			Entity ent2 = engine.CreateEntity("ent.obj", "ent.phys");
+			engine.CreateEntity("sponza.obj", "ent.phys");
 
-			engine.Physics.AddForceGenerator(new Force1(), ent1);
-			engine.Physics.AddForceGenerator(new Force2(), ent2);
 			engine.Run();
 
-			while (true) ;
+			engine.CameraPosition = new Vector3(500, 100, 0);
+
+			double d = 0.0D;
+			while (true)
+			{
+				engine.CameraLookat = engine.CameraPosition + new Vector3(Math.Sin(d), 0, Math.Cos(d));
+
+				d += 0.00000005D;
+			}
 		}
 	}
 }
