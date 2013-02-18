@@ -48,7 +48,6 @@
     <Compile Include="Framework\Quaternion.cs" />
     <Compile Include="Framework\Vector2.cs" />
     <Compile Include="Framework\Vector3.cs" />
-    <Compile Include="Graphics\Face.cs" />
     <Compile Include="Graphics\Graphics.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\Model.cs" />

@@ -10,58 +10,6 @@ namespace Lux.Resources
 {
 	static internal class ObjLoader
 	{
-		//internal static Model LoadFromFile(string path)
-		//{
-		//	List<Mesh> meshes = new List<Mesh>();
-		//	List<MeshVertex> meshVertices = new List<MeshVertex>();
-		//	List<uint[]> meshIndices = new List<uint[]>();
-
-		//	string[] lines = File.ReadAllLines(path);
-
-		//	foreach (string line in lines)
-		//	{
-		//		if (line.Length == 0 || line[0] == '#')
-		//		{
-		//			continue;
-		//		}
-
-		//		string[] parts = line.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-		//		switch (parts[0])
-		//		{
-		//			case "mtllib":
-		//			{
-		//				break;
-		//			}
-
-		//			case "v":
-		//			{
-		//				meshVertices.Add(new MeshVertex(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]), 200, 200, 200));
-		//				break;
-		//			}
-
-		//			case "f":
-		//			{
-		//				List<uint> faceIndices = new List<uint>();
-		//				for (int i = 1; i < parts.Length; i++)
-		//				{
-		//					faceIndices.Add(uint.Parse(parts[i].Substring(0, parts[i].IndexOf('/'))));
-		//				}
-		//				meshIndices.Add(faceIndices.ToArray());
-		//				break;
-		//			}
-
-		//			default:
-		//			{
-		//				break;
-		//			}
-		//		}
-		//	}
-
-		//	meshes.Add(new Mesh(meshVertices.ToArray(), meshIndices));
-
-		//	return new Model(meshes.ToArray());
-		//}
-
 		internal static Model LoadFromFile(string path)
 		{
 			List<MeshVertex> tempMeshVertices = new List<MeshVertex>();
@@ -84,19 +32,19 @@ namespace Lux.Resources
 				{
 					case "v":
 					{
-						tempMeshVertices.Add(new MeshVertex(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3]), 200, 200, 200));
+						tempMeshVertices.Add(new MeshVertex(ParseFloat(parts[1]), ParseFloat(parts[2]), ParseFloat(parts[3]), 200, 200, 200));
 						break;
 					}
 
 					case "vt":
 					{
-						tempMeshTexCoords.Add(new MeshTexCoord(float.Parse(parts[1]), float.Parse(parts[2])));
+						tempMeshTexCoords.Add(new MeshTexCoord(ParseFloat(parts[1]), ParseFloat(parts[2])));
 						break;
 					}
 
 					case "vn":
 					{
-						tempMeshNormals.Add(new MeshNormal(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
+						tempMeshNormals.Add(new MeshNormal(ParseFloat(parts[1]), ParseFloat(parts[2]), ParseFloat(parts[3])));
 						break;
 					}
 
@@ -107,18 +55,16 @@ namespace Lux.Resources
 					}
 				}
 			}
-
-			List<Face> meshFaces = new List<Face>();
-
+			
 			MeshVertex[] meshVertices = new MeshVertex[tempMeshVertices.Count];
 			MeshTexCoord[] meshTexCoords = new MeshTexCoord[tempMeshVertices.Count];
 			MeshNormal[] meshNormals = new MeshNormal[tempMeshVertices.Count];
+			List<uint> meshIndices = new List<uint>();
 
 			foreach (string face in faceDefinitions)
 			{
 				string[] parts = face.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
-				List<uint> meshIndices = new List<uint>();
 				for (int i = 1; i < parts.Length; i++)
 				{
 					int vertexPointer = int.Parse(parts[i].Substring(0, parts[i].IndexOf('/'))) - 1;
@@ -132,10 +78,22 @@ namespace Lux.Resources
 					meshNormals[vertexPointer] = tempMeshNormals[normalPointer];
 				}
 
-				meshFaces.Add(new Face(meshIndices.ToArray()));
+				if (parts.Length == 5)
+				{
+					int vertexPointer1 = int.Parse(parts[1].Substring(0, parts[1].IndexOf('/'))) - 1;
+					int vertexPointer2 = int.Parse(parts[3].Substring(0, parts[3].IndexOf('/'))) - 1;
+
+					meshIndices.Insert(meshIndices.Count - 1, (uint)vertexPointer1);
+					meshIndices.Insert(meshIndices.Count - 1, (uint)vertexPointer2);
+				}
 			}
 
-			return new Model(new Mesh[] { new Mesh(meshVertices, meshNormals, meshTexCoords, meshFaces.ToArray()) });
+			return new Model(new Mesh[] { new Mesh(meshVertices, meshNormals, meshTexCoords, meshIndices.ToArray()) });
+		}
+
+		static internal float ParseFloat(string data)
+		{
+			return float.Parse(data, System.Globalization.CultureInfo.InvariantCulture);
 		}
 	}
 }

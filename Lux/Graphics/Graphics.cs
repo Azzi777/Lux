@@ -46,11 +46,12 @@ namespace Lux.Graphics
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 
 			GraphicsContext.Assert();
+
+			GraphicsContext.CurrentContext.VSync = false;
 		}
 
 		internal void Render(double deltaTime)
 		{
-			GraphicsContext.Assert();
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, Parent.CameraLookat.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
 			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 

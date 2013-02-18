@@ -10,13 +10,13 @@ namespace Lux.Graphics
 {
 	internal class Mesh
 	{
-		Face[] Faces;
-
+		int VertexCount;
+		uint IndexBufferID;
 		uint VertexBufferID;
 		uint NormalBufferID;
 		uint TextureBufferID;
 
-		public Mesh(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, Face[] faces)
+		public Mesh(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, uint[] indices)
 		{
 			GL.GenBuffers(1, out VertexBufferID);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
@@ -30,7 +30,11 @@ namespace Lux.Graphics
 			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
 			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(texCoords.Length * MeshTexCoord.GetSize()), texCoords, BufferUsageHint.StaticDraw);
 
-			Faces = faces;
+			GL.GenBuffers(1, out IndexBufferID);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(uint)), indices, BufferUsageHint.StaticDraw);
+
+			VertexCount = indices.Length;
 		}
 
 		public void Render()
@@ -49,12 +53,14 @@ namespace Lux.Graphics
 			GL.BindBuffer(BufferTarget.ArrayBuffer, TextureBufferID);
 			GL.EnableClientState(ArrayCap.TextureCoordArray);
 			GL.TexCoordPointer(2, TexCoordPointerType.Float, MeshTexCoord.GetSize(), 0);
+			
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
+			GL.EnableClientState(ArrayCap.IndexArray);
+			GL.IndexPointer(IndexPointerType.Int, sizeof(uint), 0);
 
+			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
-			foreach (Face face in Faces)
-			{
-				face.Render();
-			}
+			GL.DisableClientState(ArrayCap.IndexArray);
 			
 			GL.DisableClientState(ArrayCap.VertexArray);
 			GL.DisableClientState(ArrayCap.ColorArray);
