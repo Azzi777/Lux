@@ -157,7 +157,7 @@ namespace Lux.Framework
         }
 
         /// <summary>
-        /// Rotates a matrix by using a quaternion
+        /// Rotates a matrix using a quaternion
         /// </summary>
         /// <param name="orientation">The orientation quaternion</param>
         /// <returns>A rotated matrix</returns>
@@ -167,7 +167,7 @@ namespace Lux.Framework
         }
 
         /// <summary>
-        /// Rotates a matrix by using a quaternion
+        /// Rotates a matrix using a quaternion
         /// </summary>
         /// <param name="orientation">The orientation quaternion</param>
         /// <returns>A rotated matrix</returns>

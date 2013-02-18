@@ -148,7 +148,7 @@ namespace Lux.Framework
         private void CalculateTransformMatrix()
         {
             TransformMatrix = Matrix4.CreateTranslation(Position);
-            //TransformMatrix = Matrix4.Rotate(TransformMatrix, Orientation);
+            TransformMatrix.Rotate(Orientation);
         }
 
         /// <summary>
