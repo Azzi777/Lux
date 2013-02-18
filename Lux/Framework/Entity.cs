@@ -148,7 +148,7 @@ namespace Lux.Framework
         private void CalculateTransformMatrix()
         {
             TransformMatrix = Matrix4.CreateTranslation(Position);
-            TransformMatrix = Matrix4.Rotate(TransformMatrix, Orientation);
+            //TransformMatrix = Matrix4.Rotate(TransformMatrix, Orientation);
         }
 
         /// <summary>
@@ -196,13 +196,13 @@ namespace Lux.Framework
 
             Position += Velocity * deltaTime;
 
-            //Orientation *= AngularVelocity * deltaTime;
-            //Orientation.Normalize();
+            Orientation *= AngularVelocity * deltaTime;
+            Orientation.Normalize();
 
             ForceAccumulator = Vector3.Zero;
             TorqueAccumulator = Vector3.Zero;
 
-            //CalculateTransformMatrix();
+            CalculateTransformMatrix();
         }
     }
 }
