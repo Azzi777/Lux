@@ -62,11 +62,11 @@ namespace Lux.Graphics
 
 
 			foreach (Entity entity in Parent.Entities)
-            {
-                GL.MatrixMode(MatrixMode.Projection);
-                GL.LoadMatrix(ref Projection);
-                GL.MatrixMode(MatrixMode.Modelview);
-                GL.LoadMatrix(ref View);
+			{
+				GL.MatrixMode(MatrixMode.Projection);
+				GL.LoadMatrix(ref Projection);
+				GL.MatrixMode(MatrixMode.Modelview);
+				GL.LoadMatrix(ref View);
 
 				entity.Model.Render(entity);
 			}
