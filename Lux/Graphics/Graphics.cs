@@ -16,26 +16,13 @@ namespace Lux.Graphics
 		private Matrix4d View;
 		private Matrix4d Projection;
 
-		private IGraphicsContext ResourceContext;
-		private INativeWindow ResourceWindow;
-		private GraphicsContext RenderContext;
-
 		internal GraphicsEngine(Engine parent)
 		{
 			Parent = parent;
-
-			GraphicsContext.ShareContexts = true;
-			ResourceWindow = new NativeWindow();
-			ResourceContext = new GraphicsContext(GraphicsMode.Default, ResourceWindow.WindowInfo);
-			ResourceContext.MakeCurrent(ResourceWindow.WindowInfo);
-			(ResourceContext as IGraphicsContextInternal).LoadAll();
-			GraphicsContext.Assert();
 		}
 
 		internal void SetupRender()
 		{
-			RenderContext = new GraphicsContext(new GraphicsMode(32, 24, 8, 16), Parent.Window.WindowInfo, 1, 0, GraphicsContextFlags.Default);
-			RenderContext.MakeCurrent(Parent.Window.WindowInfo);
 			Parent.Window.Visible = true;
 
 			GL.Enable(EnableCap.Multisample);
@@ -44,8 +31,6 @@ namespace Lux.Graphics
 
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
-
-			GraphicsContext.Assert();
 
 			GraphicsContext.CurrentContext.VSync = false;
 		}

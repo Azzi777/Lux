@@ -13,6 +13,8 @@ namespace Lux.Graphics
 		int VertexCount;
 		uint IndexBufferID;
 
+		uint[] TempIndices;
+
 		public Color4 AmbientColor;
 		public Color4 DiffuseColor;
 		public Color4 EmissiveColor;
@@ -28,11 +30,7 @@ namespace Lux.Graphics
 
 		public Mesh(uint[] indices)
 		{
-			GL.GenBuffers(1, out IndexBufferID);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(uint)), indices, BufferUsageHint.StaticDraw);
-
-			VertexCount = indices.Length;
+			TempIndices = indices;
 
 			AmbientColor = Color4.White;
 			DiffuseColor = Color4.White;
@@ -41,6 +39,35 @@ namespace Lux.Graphics
 			Transparency = 0.0F;
 			SpecularCoefficient = 10.0F;
 			ReflectionIndex = 1.5F;
+		}
+
+
+		public void Finish()
+		{
+			GL.GenBuffers(1, out IndexBufferID);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
+			GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(TempIndices.Length * sizeof(uint)), TempIndices, BufferUsageHint.StaticDraw);
+
+			VertexCount = TempIndices.Length;
+
+			TempIndices = null;
+
+			if (AmbientTexture != null)
+			{
+				AmbientTexture.Finish();
+			}
+			if (DiffuseTexture != null)
+			{
+				DiffuseTexture.Finish();
+			}
+			if (AlphaTexture != null)
+			{
+				AlphaTexture.Finish();
+			}
+			if (BumpMapTexture != null)
+			{
+				BumpMapTexture.Finish();
+			}
 		}
 
 		public void Render()
