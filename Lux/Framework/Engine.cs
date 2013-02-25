@@ -33,17 +33,17 @@ namespace Lux.Framework
 		/// <summary>
 		/// The physics part of the engine
 		/// </summary>
-		internal PhysicsEngine Physics { get; private set; }
+		public PhysicsEngine Physics { get; private set; }
 
 		/// <summary>
 		/// The graphics part of the engine
 		/// </summary>
-		internal GraphicsEngine Graphics { get; private set; }
+		public GraphicsEngine Graphics { get; private set; }
 
 		/// <summary>
 		/// The input part of the engine
 		/// </summary>
-		internal InputEngine Input { get; private set; }
+		public InputEngine Input { get; private set; }
 
 		internal List<Entity> Entities;
 		internal Window Window;
@@ -96,18 +96,6 @@ namespace Lux.Framework
 			Entity entity = new Entity(body, model);
 			Entities.Add(entity);
 			return entity;
-		}
-		
-		public void BindKey(Key key, Action routine, bool keyUp = false)
-		{
-			if (!keyUp)
-			{
-				Input.BindKeyDown(key, routine);
-			}
-			else
-			{
-				Input.BindKeyUp(key, routine);
-			}
 		}
 
 		/// <summary>

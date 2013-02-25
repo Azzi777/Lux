@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,16 +26,26 @@ namespace Test
 
 			Vector3 LookDir = new Vector3(0, 0, 0);
 
-			engine.BindKey(Key.W, () => { engine.CameraPosition += LookDir; });
+			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += LookDir * 10; });
+			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += LookDir.Cross(Vector3.Up) * 10; });
+			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition -= LookDir.Cross(Vector3.Up) * 10; });
+			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= LookDir * 10; });
+			engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.Up * 10; });
+			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition -= Vector3.Up * 10; });
 
-			double d = 0.0D;
+
+			Stopwatch timer = new Stopwatch();
+			double d = 0;
+
 			while (true)
 			{
-				LookDir = new Vector3(Math.Sin(10 * d), 0, Math.Cos(10 * d));
+				timer.Restart();
+				LookDir = new Vector3(Math.Sin(d), 0, Math.Cos(d));
 				engine.CameraLookat = LookDir + engine.CameraPosition;
 
+				d += 0.001;
 
-				d += 0.000000003D;
+				while (timer.Elapsed.TotalMilliseconds < 10) ;
 			}
 		}
 	}

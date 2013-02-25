@@ -33,6 +33,7 @@ namespace Lux.Framework
 			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
 			Parent.Physics.Update(e.Time);
+			Parent.Input.Update();
 		}
 
 		uint frames = 0;
