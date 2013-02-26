@@ -57,10 +57,10 @@ namespace Lux.Graphics
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraPosition.OpenTKEquivalent, 100.0F));
-			GL.Light(LightName.Light0, LightParameter.Specular, Color4.White);
-			GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
-			GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
+			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraPosition.OpenTKEquivalent, 1.0F));
+			//GL.Light(LightName.Light0, LightParameter.Specular, Color4.White);
+			//GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
+			//GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
 
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 

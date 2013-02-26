@@ -22,13 +22,13 @@ namespace Test
 
 			engine.CameraPosition = new Vector3(500, 500, 0);
 
-			double d = 0.0D;
+			double d = 0.0;
 			while (true)
 			{
 				engine.CameraPosition = new Vector3(Math.Sin(d) * 1000, 500, 0);
 				engine.CameraLookat = engine.CameraPosition + new Vector3(Math.Sin(10 * d), 0, Math.Cos(10 * d));
 
-				d += 0.000000003D;
+				d += 0.000000003;
 			}
 		}
 	}
