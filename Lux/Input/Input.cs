@@ -11,13 +11,16 @@ namespace Lux.Input
 {
 	public class InputEngine
 	{
+		#region - Fields -
 		private Engine Parent { get; set; }
 		private Dictionary<Key, Tuple<Action, Action, Action>> KeyBinds { get; set; }
 		private Dictionary<Key, bool> KeyHeld { get; set; }
 		private Dictionary<MouseEvent, Action<MouseEventArguments>> MouseBinds { get; set; }
-		private KeyboardDevice Keyboard { get; set; }
-		private MouseDevice Mouse { get; set; }
+		private KeyboardDevice KeyboardDev { get; set; }
+		private MouseDevice MouseDev { get; set; }
+		#endregion
 
+		#region - Engine Interface Methods -
 		internal InputEngine(Engine parent)
 		{
 			Parent = parent;
@@ -45,17 +48,30 @@ namespace Lux.Input
 
 		internal void Finish()
 		{
-			Keyboard = Parent.Window.Keyboard;
-			Keyboard.KeyDown += KeyDown;
-			Keyboard.KeyUp += KeyUp;
+			KeyboardDev = Parent.Window.Keyboard;
+			KeyboardDev.KeyDown += KeyDown;
+			KeyboardDev.KeyUp += KeyUp;
 
-			Mouse = Parent.Window.Mouse;
-			Mouse.Move += MouseMove;
-			Mouse.ButtonDown += Mouse_ButtonDown;
-			Mouse.ButtonUp += Mouse_ButtonUp;
-			Mouse.WheelChanged += Mouse_WheelChanged;
+			MouseDev = Parent.Window.Mouse;
+			MouseDev.Move += MouseMove;
+			MouseDev.ButtonDown += Mouse_ButtonDown;
+			MouseDev.ButtonUp += Mouse_ButtonUp;
+			MouseDev.WheelChanged += Mouse_WheelChanged;
 		}
 
+		internal void Update()
+		{
+			foreach (KeyValuePair<Key, bool> kvp in KeyHeld)
+			{
+				if (kvp.Value)
+				{
+					KeyBinds[kvp.Key].Item3.Invoke();
+				}
+			}
+		}
+		#endregion
+
+		#region - Binding Methods -
 		public void BindKeyDown(Key key, Action routine)
 		{
 			KeyBinds[key] = new Tuple<Action, Action, Action>(routine, KeyBinds[key].Item2, KeyBinds[key].Item3);
@@ -75,7 +91,9 @@ namespace Lux.Input
 		{
 			MouseBinds[mouseEvent] = routine;
 		}
+		#endregion
 
+		#region - Eventhandlers -
 		private void KeyDown(object sender, KeyboardKeyEventArgs args)
 		{
 			KeyBinds[GetFromOpenTKEquivalent(args.Key)].Item1.Invoke();
@@ -90,17 +108,40 @@ namespace Lux.Input
 			KeyHeld[GetFromOpenTKEquivalent(args.Key)] = false;
 		}
 
-		internal void Update()
+		private void MouseMove(object sender, MouseMoveEventArgs e)
 		{
-			foreach (KeyValuePair<Key, bool> kvp in KeyHeld)
+			MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, MouseDev.Wheel));
+		}
+
+		private void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			switch (e.Button)
 			{
-				if (kvp.Value)
-				{
-					KeyBinds[kvp.Key].Item3.Invoke();
-				}
+				case MouseButton.Left: MouseBinds[MouseEvent.LeftDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				case MouseButton.Right: MouseBinds[MouseEvent.RightDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				default: throw new InvalidOperationException("Button not supported!");
 			}
 		}
 
+		private void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
+		{
+			switch (e.Button)
+			{
+				case MouseButton.Left: MouseBinds[MouseEvent.LeftUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				case MouseButton.Right: MouseBinds[MouseEvent.RightUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, MouseDev.Wheel)); break;
+				default: throw new InvalidOperationException("Button not supported!");
+			}
+		}
+
+		private void Mouse_WheelChanged(object sender, MouseWheelEventArgs e)
+		{
+			MouseBinds[MouseEvent.WheelMove](new MouseEventArguments(e.X, e.Y, 0, 0, e.Delta, e.Value));
+		}
+		#endregion
+
+		#region - Utilities -
 		private Key GetFromOpenTKEquivalent(OpenTK.Input.Key key)
 		{
 			switch (key)
@@ -240,172 +281,30 @@ namespace Lux.Input
 				#endregion
 			}
 		}
-
-		private void MouseMove(object sender, MouseMoveEventArgs e)
-		{
-			MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, Mouse.Wheel));
-		}
-
-		void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
-		{
-			switch (e.Button)
-			{
-				case MouseButton.Left: MouseBinds[MouseEvent.LeftDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				case MouseButton.Right: MouseBinds[MouseEvent.RightDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				default: throw new InvalidOperationException("Button not supported!");
-			}
-		}
-
-		void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
-		{
-			switch (e.Button)
-			{
-				case MouseButton.Left: MouseBinds[MouseEvent.LeftUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				case MouseButton.Right: MouseBinds[MouseEvent.RightUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
-				default: throw new InvalidOperationException("Button not supported!");
-			}
-		}
-
-		void Mouse_WheelChanged(object sender, MouseWheelEventArgs e)
-		{
-			MouseBinds[MouseEvent.WheelMove](new MouseEventArguments(e.X, e.Y, 0, 0, e.Delta, e.Value));
-		}
+		#endregion
 	}
 
+	#region - Enums and Structures related to Input -
 	public enum Key
 	{
 		#region Keys
 		Unknown,
-		F1,
-		F2,
-		F3,
-		F4,
-		F5,
-		F6,
-		F7,
-		F8,
-		F9,
-		F10,
-		F11,
-		F12,
-		F13,
-		F14,
-		F15,
-		F16,
-		F17,
-		F18,
-		F19,
-		F20,
-		F21,
-		F22,
-		F23,
-		F24,
-		F25,
-		F26,
-		F27,
-		F28,
-		F29,
-		F30,
-		F31,
-		F32,
-		F33,
-		F34,
-		F35,
-		LeftShift,
-		RightShift,
-		LeftControl,
-		RightControl,
-		LeftAlt,
-		RightAlt,
-		LeftWin,
-		RightWin,
+		F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26, F27, F28, F29, F30, F31, F32, F33, F34, F35,
+		LeftShift, RightShift, LeftControl, RightControl, LeftAlt, RightAlt, LeftWin, RightWin,
 		Menu,
-		Up,
-		Down,
-		Left,
-		Right,
-		Enter,
-		Escape,
-		Space,
-		Tab,
-		BackSpace,
-		Back = BackSpace,
-		Insert,
-		Delete,
-		PageUp,
-		PageDown,
-		Home,
-		End,
-		CapsLock,
-		ScrollLock,
-		PrintScreen,
-		Pause,
-		NumLock,
-		Clear,
+		Up, Down, Left, Right,
+		Enter, Escape, Space, Tab, BackSpace,
+		Insert, Delete, PageUp, PageDown, Home, End,
+		CapsLock, ScrollLock, NumLock,
+		PrintScreen, Pause, Clear,
 		Sleep,
-		Keypad0,
-		Keypad1,
-		Keypad2,
-		Keypad3,
-		Keypad4,
-		Keypad5,
-		Keypad6,
-		Keypad7,
-		Keypad8,
-		Keypad9,
-		KeypadDivide,
-		KeypadMultiply,
-		KeypadSubtract,
-		KeypadMinus = KeypadSubtract,
-		KeypadAdd,
-		KeypadPlus = KeypadAdd,
-		KeypadDecimal,
-		KeypadEnter,
-		A,
-		B,
-		C,
-		D,
-		E,
-		F,
-		G,
-		H,
-		I,
-		J,
-		K,
-		L,
-		M,
-		N,
-		O,
-		P,
-		Q,
-		R,
-		S,
-		T,
-		U,
-		V,
-		W,
-		X,
-		Y,
-		Z,
-		Number0,
-		Number1,
-		Number2,
-		Number3,
-		Number4,
-		Number5,
-		Number6,
-		Number7,
-		Number8,
-		Number9,
+		Keypad0, Keypad1, Keypad2, Keypad3, Keypad4, Keypad5, Keypad6, Keypad7, Keypad8, Keypad9,
+		KeypadDivide, KeypadMultiply, KeypadSubtract, KeypadAdd, KeypadDecimal, KeypadEnter,
+		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+		Number0, Number1, Number2, Number3, Number4, Number5, Number6, Number7, Number8, Number9,
 		Tilde,
-		Minus,
-		Plus,
-		BracketLeft,
-		LBracket = BracketLeft,
-		BracketRight,
-		RBracket = BracketRight,
+		Minus, Plus,
+		BracketLeft, BracketRight,
 		Semicolon,
 		Quote,
 		Comma,
@@ -447,4 +346,5 @@ namespace Lux.Input
 			WheelPosition = wp;
 		}
 	}
+	#endregion
 }
