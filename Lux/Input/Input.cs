@@ -14,7 +14,7 @@ namespace Lux.Input
 		private Engine Parent { get; set; }
 		private Dictionary<Key, Tuple<Action, Action, Action>> KeyBinds { get; set; }
 		private Dictionary<Key, bool> KeyHeld { get; set; }
-		private Dictionary<MouseEvent, Action> MouseBinds { get; set; }
+		private Dictionary<MouseEvent, Action<MouseEventArguments>> MouseBinds { get; set; }
 		private KeyboardDevice Keyboard { get; set; }
 		private MouseDevice Mouse { get; set; }
 
@@ -33,12 +33,12 @@ namespace Lux.Input
 				}
 			}
 
-			MouseBinds = new Dictionary<MouseEvent, Action>();
+			MouseBinds = new Dictionary<MouseEvent, Action<MouseEventArguments>>();
 			foreach (MouseEvent m in Enum.GetValues(typeof(MouseEvent)))
 			{
 				if (!MouseBinds.ContainsKey(m))
 				{
-					MouseBinds.Add(m, () => { });
+					MouseBinds.Add(m, (MouseEventArguments e) => { });
 				}
 			}
 		}
@@ -51,6 +51,9 @@ namespace Lux.Input
 
 			Mouse = Parent.Window.Mouse;
 			Mouse.Move += MouseMove;
+			Mouse.ButtonDown += Mouse_ButtonDown;
+			Mouse.ButtonUp += Mouse_ButtonUp;
+			Mouse.WheelChanged += Mouse_WheelChanged;
 		}
 
 		public void BindKeyDown(Key key, Action routine)
@@ -66,6 +69,11 @@ namespace Lux.Input
 		public void BindKeyHold(Key key, Action routine)
 		{
 			KeyBinds[key] = new Tuple<Action, Action, Action>(KeyBinds[key].Item1, KeyBinds[key].Item2, routine);
+		}
+
+		public void BindMouseEvent(MouseEvent mouseEvent, Action<MouseEventArguments> routine)
+		{
+			MouseBinds[mouseEvent] = routine;
 		}
 
 		private void KeyDown(object sender, KeyboardKeyEventArgs args)
@@ -95,7 +103,7 @@ namespace Lux.Input
 
 		private Key GetFromOpenTKEquivalent(OpenTK.Input.Key key)
 		{
-			switch(key)
+			switch (key)
 			{
 				#region Keys
 				case OpenTK.Input.Key.F1: return Key.F1;
@@ -235,7 +243,34 @@ namespace Lux.Input
 
 		private void MouseMove(object sender, MouseMoveEventArgs e)
 		{
-			MouseBinds[MouseEvent.Move].Invoke();
+			MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, Mouse.Wheel));
+		}
+
+		void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			switch (e.Button)
+			{
+				case MouseButton.Left: MouseBinds[MouseEvent.LeftDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				case MouseButton.Right: MouseBinds[MouseEvent.RightDown](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				default: throw new InvalidOperationException("Button not supported!");
+			}
+		}
+
+		void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
+		{
+			switch (e.Button)
+			{
+				case MouseButton.Left: MouseBinds[MouseEvent.LeftUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				case MouseButton.Middle: MouseBinds[MouseEvent.MiddleUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				case MouseButton.Right: MouseBinds[MouseEvent.RightUp](new MouseEventArguments(e.X, e.Y, 0, 0, 0, Mouse.Wheel)); break;
+				default: throw new InvalidOperationException("Button not supported!");
+			}
+		}
+
+		void Mouse_WheelChanged(object sender, MouseWheelEventArgs e)
+		{
+			MouseBinds[MouseEvent.WheelMove](new MouseEventArguments(e.X, e.Y, 0, 0, e.Delta, e.Value));
 		}
 	}
 
@@ -383,6 +418,33 @@ namespace Lux.Input
 
 	public enum MouseEvent
 	{
-		Move
+		Move,
+		LeftDown,
+		LeftUp,
+		RightDown,
+		RightUp,
+		MiddleDown,
+		MiddleUp,
+		WheelMove
+	}
+
+	public struct MouseEventArguments
+	{
+		public int X;
+		public int Y;
+		public int XDelta;
+		public int YDelta;
+		public int WheelDelta;
+		public int WheelPosition;
+
+		public MouseEventArguments(int x, int y, int dx, int dy, int dw, int wp)
+		{
+			X = x;
+			Y = y;
+			XDelta = dx;
+			YDelta = dy;
+			WheelDelta = dw;
+			WheelPosition = wp;
+		}
 	}
 }

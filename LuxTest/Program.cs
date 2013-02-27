@@ -37,7 +37,9 @@ namespace Test
 			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= LookDir * 10; });
 			engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.Up * 10; });
 			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition -= Vector3.Up * 10; });
-
+			engine.Input.BindKeyHold(Key.Escape, () => { engine.Stop(); });
+			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => { Console.WriteLine(e.X + ", " + e.Y); });
+			engine.Input.BindMouseEvent(MouseEvent.WheelMove, (MouseEventArguments e) => { Console.WriteLine(e.WheelPosition); });
 
 			Stopwatch timer = new Stopwatch();
 			double d = 0;
