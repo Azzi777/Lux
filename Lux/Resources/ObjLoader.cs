@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Text;
 using OpenTK.Graphics;
  
@@ -13,9 +14,9 @@ namespace Lux.Resources
 	{
 		internal static Model LoadFromFile(string path)
 		{
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
 			string directory = path.Substring(0, path.LastIndexOf('\\'));
-
-
 
 			List<MeshVertex> tempMeshVertices = new List<MeshVertex>();
 			List<MeshTexCoord> tempMeshTexCoords = new List<MeshTexCoord>();

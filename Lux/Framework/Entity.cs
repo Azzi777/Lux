@@ -67,26 +67,6 @@ namespace Lux.Framework
 			Model = Model.LoadFromFile(model);
 		}
 
-		/// <summary>
-		/// Creates a new enitity
-		/// </summary>
-		/// <param name="body">The full or relative path to the body file.</param>
-		internal Entity(string body)
-		{
-			Position = Vector3.Zero;
-			Velocity = Vector3.Zero;
-			SetMass(1);
-			Orientation = Quaternion.Identity;
-			AngularVelocity = Quaternion.Identity;
-			InertiaTensor = Matrix3.Identity;
-			TransformMatrix = Matrix4.Identity;
-		}
-
-		internal void Finalize(string modelpath)
-		{
-			Model = Model.LoadFromFile(modelpath);
-		}
-
 		#region Accessor functions
 
 		/// <summary>
