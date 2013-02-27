@@ -14,7 +14,7 @@ namespace Test
 	class Program
 	{
 		static Engine engine;
-
+		static Vector3 LookDir;
 		static void Main(string[] args)
 		{
 			Engine.LoadDependencies();
@@ -27,14 +27,14 @@ namespace Test
 			Entity sponza = engine.CreateEntity(@"models\sponza.obj", "ent.phys");
 			Console.WriteLine("Done!");
 
-			engine.CameraPosition = new Vector3(500, 500, 0);
+			engine.CameraPosition = new Vector3(500, 100, 0);
 
-			Vector3 LookDir = new Vector3(0, 0, 0);
+			LookDir = new Vector3(0, 0, 0);
 
-			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += LookDir * 10; });
-			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += LookDir.Cross(Vector3.Up) * 10; });
-			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition -= LookDir.Cross(Vector3.Up) * 10; });
-			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= LookDir * 10; });
+			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += Vector3.Forwards * 10; });
+			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += Vector3.Right * 10; });
+			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition += Vector3.Left * 10; });
+			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition += Vector3.Backwards * 10; });
 			engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.Up * 10; });
 			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition -= Vector3.Up * 10; });
 
@@ -49,9 +49,9 @@ namespace Test
 				LookDir = new Vector3(Math.Sin(d), 0, Math.Cos(d));
 				engine.CameraLookat = LookDir + engine.CameraPosition;
 
-				d += 0.001;
+				d += 0.0004;
 
-				while (timer.Elapsed.TotalMilliseconds < 10) ;
+				while (timer.Elapsed.TotalMilliseconds < 1) ;
 			}
 		}
 	}

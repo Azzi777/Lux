@@ -30,18 +30,30 @@ namespace Lux.Graphics
 			GL.ClearColor(Color4.CornflowerBlue);
 
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
-			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
+			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
 
 			GraphicsContext.CurrentContext.VSync = false;
+
+
 		}
 
 		internal void Render(double deltaTime)
 		{
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, Parent.CameraLookat.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
-			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
+			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			
+
+			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraPosition.OpenTKEquivalent, 1.0F));
+			GL.Light(LightName.Light0, LightParameter.Specular, Color4.White);
+			GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
+			GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
+
+
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Back);
+			GL.Enable(EnableCap.Lighting);
+			GL.Enable(EnableCap.Light0);
 
 			lock(Parent.Entities)
 			{
@@ -55,6 +67,10 @@ namespace Lux.Graphics
 					entity.Model.Render(entity);
 				}
 			}
+
+			GL.Disable(EnableCap.Light0);
+			GL.Disable(EnableCap.Lighting);
+			GL.Disable(EnableCap.CullFace);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
 		}

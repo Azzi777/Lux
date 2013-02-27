@@ -32,10 +32,10 @@ namespace Lux.Graphics
 		{
 			TempIndices = indices;
 
-			AmbientColor = Color4.White;
-			DiffuseColor = Color4.White;
-			EmissiveColor = Color4.White;
-			SpecularColor = Color4.White;
+			AmbientColor = Color4.Black;
+			DiffuseColor = Color4.Black;
+			EmissiveColor = Color4.Black;
+			SpecularColor = Color4.Black;
 			Transparency = 0.0F;
 			SpecularCoefficient = 10.0F;
 			ReflectionIndex = 1.5F;
@@ -91,28 +91,10 @@ namespace Lux.Graphics
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
 			GL.DisableClientState(ArrayCap.IndexArray);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
+			GL.BindTexture(TextureTarget.Texture2D, 0);
 			GL.Disable(EnableCap.Texture2D);
-		}
-
-		public void LoadAmbientTexture(string path)
-		{
-			AmbientTexture = new Texture(path);
-		}
-
-		public void LoadDiffuseTexture(string path)
-		{
-			DiffuseTexture = new Texture(path);
-		}
-
-		public void LoadAlphaTexture(string path)
-		{
-			AlphaTexture = new Texture(path);
-		}
-
-		public void LoadBumpMapTexture(string path)
-		{
-			BumpMapTexture = new Texture(path);
 		}
 	}
 
