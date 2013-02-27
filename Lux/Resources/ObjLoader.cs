@@ -150,16 +150,17 @@ namespace Lux.Resources
 			}
 			if (material.SpecularHighlightTextureMap != null)
 			{
-				//mesh.AlphaTexture = textures[material.SpecularHighlightTextureMap];
+				mesh.SpecularHighlightTexture = textures[material.SpecularHighlightTextureMap];
 			}
 			if (material.SpecularTextureMap != null)
 			{
-				//mesh.AlphaTexture = textures[material.SpecularTextureMap];
+				mesh.SpecularTexture = textures[material.SpecularTextureMap];
 			}
 			if (material.StencilDecalMap != null)
 			{
-				//mesh.AlphaTexture = textures[material.StencilDecalMap];
+				mesh.StencilDecal = textures[material.StencilDecalMap];
 			}
+
 			mesh.AmbientColor = new Color4(material.AmbientColor.X, material.AmbientColor.Y, material.AmbientColor.Z, 1.0F);
 			mesh.DiffuseColor = new Color4(material.DiffuseColor.X, material.DiffuseColor.Y, material.DiffuseColor.Z, 1.0F);
 			mesh.SpecularColor = new Color4(material.SpecularColor.X, material.SpecularColor.Y, material.SpecularColor.Z, 1.0F);

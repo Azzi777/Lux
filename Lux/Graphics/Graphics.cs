@@ -33,14 +33,17 @@ namespace Lux.Graphics
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
 
 			GraphicsContext.CurrentContext.VSync = false;
-
-
 		}
 
 		internal void Render(double deltaTime)
 		{
 			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, Parent.CameraLookat.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
 			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
+
+			GL.MatrixMode(MatrixMode.Projection);
+			GL.LoadMatrix(ref Projection);
+			GL.MatrixMode(MatrixMode.Modelview);
+			GL.LoadMatrix(ref View);
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -55,18 +58,29 @@ namespace Lux.Graphics
 			GL.Enable(EnableCap.Lighting);
 			GL.Enable(EnableCap.Light0);
 
-			lock(Parent.Entities)
+			lock (Parent.Entities)
 			{
 				foreach (Entity entity in Parent.Entities)
 				{
-					GL.MatrixMode(MatrixMode.Projection);
-					GL.LoadMatrix(ref Projection);
-					GL.MatrixMode(MatrixMode.Modelview);
-					GL.LoadMatrix(ref View);
-
 					entity.Model.Render(entity);
 				}
 			}
+
+			GL.BindTexture(TextureTarget.Texture2D, 27);
+			GL.Enable(EnableCap.Texture2D);
+
+			GL.Begin(BeginMode.Quads);
+			{
+				GL.Vertex3(0, 100, -1000);
+				GL.TexCoord2(0, 0);
+				GL.Vertex3(0, 1100, -1000);
+				GL.TexCoord2(0, 1);
+				GL.Vertex3(0, 1100, 1000);
+				GL.TexCoord2(1, 1);
+				GL.Vertex3(0, 100, 1000);
+				GL.TexCoord2(1, 0);
+			}
+			GL.End();
 
 			GL.Disable(EnableCap.Light0);
 			GL.Disable(EnableCap.Lighting);

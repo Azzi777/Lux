@@ -23,10 +23,13 @@ namespace Lux.Graphics
 		public float Transparency;
 		public float ReflectionIndex;
 
-		public Texture AmbientTexture;
-		public Texture DiffuseTexture;
-		public Texture AlphaTexture;
-		public Texture BumpMapTexture;
+		public Texture AmbientTexture { get; set; }
+		public Texture DiffuseTexture { get; set; }
+		public Texture AlphaTexture { get; set; }
+		public Texture BumpMapTexture { get; set; }
+		public Texture SpecularHighlightTexture { get; set; }
+		public Texture SpecularTexture { get; set; }
+		public Texture StencilDecal { get; set; }
 
 		public Mesh(uint[] indices)
 		{
@@ -68,6 +71,18 @@ namespace Lux.Graphics
 			{
 				BumpMapTexture.Finish();
 			}
+			if (SpecularHighlightTexture != null)
+			{
+				SpecularHighlightTexture.Finish();
+			}
+			if (SpecularTexture != null)
+			{
+				SpecularTexture.Finish();
+			}
+			if (StencilDecal != null)
+			{
+				StencilDecal.Finish();
+			}
 		}
 
 		public void Render()
@@ -78,11 +93,12 @@ namespace Lux.Graphics
 			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Specular, SpecularColor);
 			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Shininess, SpecularCoefficient);
 
+			GL.Enable(EnableCap.Texture2D);
 			if (AmbientTexture != null)
 			{
-				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
 			}
+
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
 			GL.EnableClientState(ArrayCap.IndexArray);
@@ -91,9 +107,6 @@ namespace Lux.Graphics
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
 			GL.DisableClientState(ArrayCap.IndexArray);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-
-			GL.BindTexture(TextureTarget.Texture2D, 0);
 			GL.Disable(EnableCap.Texture2D);
 		}
 	}

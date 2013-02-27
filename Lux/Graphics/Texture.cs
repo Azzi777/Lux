@@ -67,9 +67,7 @@ namespace Lux.Graphics
 
 			TempBitmap.UnlockBits(TextureData);
 
-			GL.BindTexture(TextureTarget.Texture2D, 0);
-
-			TempBitmap = null;
+			TempBitmap.Dispose();
 			IsFinished = true;
 		}
 	}
