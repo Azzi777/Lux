@@ -23,19 +23,22 @@ namespace Lux.Graphics
 		public float Transparency;
 		public float ReflectionIndex;
 
-		public Texture AmbientTexture;
-		public Texture DiffuseTexture;
-		public Texture AlphaTexture;
-		public Texture BumpMapTexture;
+		public Texture AmbientTexture { get; set; }
+		public Texture DiffuseTexture { get; set; }
+		public Texture AlphaTexture { get; set; }
+		public Texture BumpMapTexture { get; set; }
+		public Texture SpecularHighlightTexture { get; set; }
+		public Texture SpecularTexture { get; set; }
+		public Texture StencilDecal { get; set; }
 
 		public Mesh(uint[] indices)
 		{
 			TempIndices = indices;
 
-			AmbientColor = Color4.White;
-			DiffuseColor = Color4.White;
-			EmissiveColor = Color4.White;
-			SpecularColor = Color4.White;
+			AmbientColor = Color4.Black;
+			DiffuseColor = Color4.Black;
+			EmissiveColor = Color4.Black;
+			SpecularColor = Color4.Black;
 			Transparency = 0.0F;
 			SpecularCoefficient = 10.0F;
 			ReflectionIndex = 1.5F;
@@ -68,6 +71,18 @@ namespace Lux.Graphics
 			{
 				BumpMapTexture.Finish();
 			}
+			if (SpecularHighlightTexture != null)
+			{
+				SpecularHighlightTexture.Finish();
+			}
+			if (SpecularTexture != null)
+			{
+				SpecularTexture.Finish();
+			}
+			if (StencilDecal != null)
+			{
+				StencilDecal.Finish();
+			}
 		}
 
 		public void Render()
@@ -78,11 +93,12 @@ namespace Lux.Graphics
 			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Specular, SpecularColor);
 			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Shininess, SpecularCoefficient);
 
+			GL.Enable(EnableCap.Texture2D);
 			if (AmbientTexture != null)
 			{
-				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
 			}
+
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
 			GL.EnableClientState(ArrayCap.IndexArray);
@@ -91,28 +107,7 @@ namespace Lux.Graphics
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
 			GL.DisableClientState(ArrayCap.IndexArray);
-
 			GL.Disable(EnableCap.Texture2D);
-		}
-
-		public void LoadAmbientTexture(string path)
-		{
-			AmbientTexture = new Texture(path);
-		}
-
-		public void LoadDiffuseTexture(string path)
-		{
-			DiffuseTexture = new Texture(path);
-		}
-
-		public void LoadAlphaTexture(string path)
-		{
-			AlphaTexture = new Texture(path);
-		}
-
-		public void LoadBumpMapTexture(string path)
-		{
-			BumpMapTexture = new Texture(path);
 		}
 	}
 

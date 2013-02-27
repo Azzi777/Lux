@@ -69,7 +69,7 @@ namespace Lux.Graphics
 
 		static public Model LoadFromFile(string path)
 		{
-			return ObjLoader.LoadFromFile(path);
+			return ObjLoader2.LoadFromFile(path);
 		}
 
 		public void Render(Entity entity)
