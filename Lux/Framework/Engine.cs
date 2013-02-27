@@ -111,6 +111,11 @@ namespace Lux.Framework
 			return entity;
 		}
 
+		public void Stop()
+		{
+			Window.Close();
+		}
+
 		/// <summary>
 		/// Set the stage to currently be in focus.
 		/// </summary>
