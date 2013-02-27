@@ -18,7 +18,7 @@ namespace Lux.Resources
 
 			string directory = path.Substring(0, path.LastIndexOf('\\'));
 
-			List<MeshVertex> tempMeshVertices = new List<MeshVertex>();
+			List<MeshPosition> tempMeshVertices = new List<MeshPosition>();
 			List<MeshTexCoord> tempMeshTexCoords = new List<MeshTexCoord>();
 			List<MeshNormal> tempMeshNormals = new List<MeshNormal>();
 
@@ -47,7 +47,7 @@ namespace Lux.Resources
 
 					case "v":
 					{
-						tempMeshVertices.Add(new MeshVertex(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
+						tempMeshVertices.Add(new MeshPosition(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
 						break;
 					}
 
@@ -90,7 +90,7 @@ namespace Lux.Resources
 				}
 			}
 			
-			MeshVertex[] meshVertices = new MeshVertex[tempMeshVertices.Count];
+			MeshPosition[] meshVertices = new MeshPosition[tempMeshVertices.Count];
 			MeshTexCoord[] meshTexCoords = new MeshTexCoord[tempMeshVertices.Count];
 			MeshNormal[] meshNormals = new MeshNormal[tempMeshVertices.Count];
 

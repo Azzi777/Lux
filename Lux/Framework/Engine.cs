@@ -17,29 +17,42 @@ namespace Lux.Framework
 	/// </summary>
 	public class Engine
 	{
-		/// <summary>
-		/// Loads the external resources and dependencies. Necessary in order to use Lux.
-		/// </summary>
-		static public void LoadDependencies()
-		{
-			InternalLibraryLinker.LoadDLLs();
-		}
+		#region - Fields -
+		internal List<Entity> Entities;
+		internal Window Window;
+		private Thread RunThread;
 
+		public Vector3 CameraPosition;
+		internal Vector3 _CameraPosition;
+
+		public Vector3 CameraLookDir;
+		internal Vector3 _CameraLookDir;
+		#endregion
+
+		#region - Properties -
 		/// <summary>
-		/// The game stage currently being executed
+		/// Gets the game stage currently being executed
 		/// </summary>
 		public IStage Stage { get; private set; }
 
 		/// <summary>
-		/// The physics part of the engine
+		/// Gets the physics part of the engine
 		/// </summary>
 		public PhysicsEngine Physics { get; private set; }
 
 		/// <summary>
-		/// The graphics part of the engine
+		/// Gets the graphics part of the engine
 		/// </summary>
 		public GraphicsEngine Graphics { get; private set; }
 
+		/// <summary>
+		/// Gets the input part of the engine
+		/// </summary>
+		public InputEngine Input { get; private set; }
+
+		/// <summary>
+		/// Gets weather the engine is running or not.
+		/// </summary>
 		public bool IsRunning
 		{
 			get
@@ -49,24 +62,22 @@ namespace Lux.Framework
 		}
 
 		/// <summary>
-		/// The input part of the engine
+		/// Gets the update rate.
 		/// </summary>
-		public InputEngine Input { get; private set; }
-
-		internal List<Entity> Entities;
-		internal Window Window;
-		private Thread RunThread;
 		public int UpdateRate { get; private set; }
-		public int RenderRate { get; private set; }
-		public Vector3 CameraPosition;
-		public Vector3 CameraLookat;
 
+		/// <summary>
+		/// Gets the render rate.
+		/// </summary>
+		public int RenderRate { get; private set; }
+		#endregion
+
+		#region - Constructors -
 		/// <summary>
 		/// Creates a new instance of the Engine class
 		/// </summary>
 		public Engine()
 		{
-
 			RunThread = new Thread(new ThreadStart(RunWindow));
 
 			Physics = new PhysicsEngine(this);
@@ -74,8 +85,16 @@ namespace Lux.Framework
 			Input = new InputEngine(this);
 
 			Entities = new List<Entity>();
-			CameraPosition = Vector3.Backwards;
-			CameraPosition = Vector3.Zero;
+		}
+		#endregion
+
+		#region - Methods -
+		/// <summary>
+		/// Loads the external resources and dependencies. Necessary in order to use Lux.
+		/// </summary>
+		static public void LoadDependencies()
+		{
+			InternalLibraryLinker.LoadDLLs();
 		}
 
 		/// <summary>
@@ -90,20 +109,17 @@ namespace Lux.Framework
 			RunThread.Start();
 		}
 
-		private void RunWindow()
-		{
-			Window = new Window(this);
-
-			Input.Finish();
-
-			Window.Run(UpdateRate, RenderRate);
-		}
-
+		/// <summary>
+		/// Creates and adds a new entity to the game.
+		/// </summary>
+		/// <param name="model">Path to the 3D-model file for the entity.</param>
+		/// <param name="body">Path to the physics body file for the entity.</param>
+		/// <returns>The new entity</returns>
 		public Entity CreateEntity(string model, string body)
 		{
 			Entity entity = new Entity(body, model);
 
-			lock(Entities)
+			lock (Entities)
 			{
 				Entities.Add(entity);
 			}
@@ -111,6 +127,9 @@ namespace Lux.Framework
 			return entity;
 		}
 
+		/// <summary>
+		/// Halts the engine, and closes the window.
+		/// </summary>
 		public void Stop()
 		{
 			Window.Close();
@@ -123,5 +142,60 @@ namespace Lux.Framework
 		public void SetStage(IStage Stage)
 		{
 		}
+		#endregion
+
+		#region - Static Methods -
+		#endregion
+
+		#region - Private Methods -
+		private void RunWindow()
+		{
+			Window = new Window(this);
+
+			Input.Finish();
+
+			Window.Run(UpdateRate, RenderRate);
+		}
+
+		uint frames = 0;
+		Stopwatch framerate;
+		internal void Render(double time)
+		{
+			UpdateExposedValues();
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+			Graphics.Render(time);
+
+			frames++;
+
+
+			if (framerate == null)
+			{
+				framerate = new Stopwatch();
+				framerate.Start();
+			}
+			if (framerate.ElapsedMilliseconds > 1000)
+			{
+				Console.WriteLine("FPS: " + ((double)frames / framerate.ElapsedMilliseconds * 1000));
+				frames = 0;
+				framerate.Restart();
+			}
+		}
+
+		internal void Update(double time)
+		{
+			// UpdateExposedValues();
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+			Physics.Update(time);
+			Input.Update();
+		}
+
+		private void UpdateExposedValues()
+		{
+			_CameraLookDir = CameraLookDir;
+			_CameraPosition = CameraPosition;
+		}
+		#endregion
 	}
 }

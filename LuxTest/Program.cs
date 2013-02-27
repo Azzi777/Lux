@@ -28,15 +28,23 @@ namespace Test
 			Console.WriteLine("Done!");
 
 			engine.CameraPosition = new Vector3(500, 500, 0);
+			engine.CameraLookDir = Vector3.PosX;
 
-			Vector3 LookDir = new Vector3(0, 0, 0);
+			double pitch = 0.0;
+			double yaw = 0.0;
 
-			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += LookDir * 10; });
-			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += LookDir.Cross(Vector3.Up) * 10; });
-			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition -= LookDir.Cross(Vector3.Up) * 10; });
-			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= LookDir * 10; });
-			engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.Up * 10; });
-			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition -= Vector3.Up * 10; });
+			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += engine.CameraLookDir * 10.0; });
+			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= engine.CameraLookDir * 10.0; });
+			//engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition += Vector3.NegZ * 10.0; });
+			//engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += Vector3.NegX * 10.0; });
+			//engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.PosY * 10.0; });
+			//engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition += Vector3.NegY * 10.0; });
+
+			engine.Input.BindKeyHold(Key.Q, () => { yaw -= 0.05; if (yaw < 0) yaw += Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.E, () => { yaw += 0.05; if (yaw >= Math.PI * 2) yaw -= Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.R, () => { pitch += 0.05; if (pitch > Math.PI / 2 - 0.00001) pitch = Math.PI / 2 - 0.00001; });
+			engine.Input.BindKeyHold(Key.F, () => { pitch -= 0.05; if (pitch < -Math.PI / 2 + 0.00001) pitch = -Math.PI / 2 + 0.00001; });
+
 			engine.Input.BindKeyHold(Key.Escape, () => { engine.Stop(); });
 			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => { Console.WriteLine(e.X + ", " + e.Y); });
 			engine.Input.BindMouseEvent(MouseEvent.WheelMove, (MouseEventArguments e) => { Console.WriteLine(e.WheelPosition); });
@@ -47,13 +55,12 @@ namespace Test
 
 			while (engine.IsRunning)
 			{
+				engine.CameraLookDir = new Vector3(Math.Cos(yaw) * Math.Cos(pitch), Math.Sin(pitch), Math.Sin(yaw) * Math.Cos(pitch));
+
 				timer.Restart();
-				LookDir = new Vector3(Math.Sin(d), 0, Math.Cos(d));
-				engine.CameraLookat = LookDir + engine.CameraPosition;
+				d += 0.00501;
 
-				d += 0.001;
-
-				while (timer.Elapsed.TotalMilliseconds < 10) ;
+				while (timer.Elapsed.TotalMilliseconds < 1) ;
 			}
 		}
 	}

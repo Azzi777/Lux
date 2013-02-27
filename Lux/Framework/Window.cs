@@ -30,34 +30,12 @@ namespace Lux.Framework
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{
-			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-
-			Parent.Physics.Update(e.Time);
-			Parent.Input.Update();
+			Parent.Update(e.Time);
 		}
 
-		uint frames = 0;
-		Stopwatch framerate;
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
-			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-
-			Parent.Graphics.Render(e.Time);
-
-			frames++;
-
-
-			if (framerate == null)
-			{
-				framerate = new Stopwatch();
-				framerate.Start();
-			}
-			if (framerate.ElapsedMilliseconds > 1000)
-			{
-				Console.WriteLine("FPS: " + ((double)frames / framerate.ElapsedMilliseconds * 1000));
-				frames = 0;
-				framerate.Restart();
-			}
+			Parent.Render(e.Time);
 		}
 	}
 }

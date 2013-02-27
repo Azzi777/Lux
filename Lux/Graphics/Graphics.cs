@@ -29,7 +29,7 @@ namespace Lux.Graphics
 			GL.Enable(EnableCap.DepthTest);
 			GL.ClearColor(Color4.CornflowerBlue);
 
-			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
+			View = OpenTK.Matrix4d.LookAt(Parent._CameraPosition.OpenTKEquivalent, OpenTK.Vector3d.Zero, OpenTK.Vector3d.UnitY);
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 
 			GraphicsContext.CurrentContext.VSync = false;
@@ -37,13 +37,13 @@ namespace Lux.Graphics
 
 		internal void Render(double deltaTime)
 		{
-			View = OpenTK.Matrix4d.LookAt(Parent.CameraPosition.OpenTKEquivalent, Parent.CameraLookat.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
+			View = OpenTK.Matrix4d.LookAt(Parent._CameraPosition.OpenTKEquivalent, Parent._CameraPosition.OpenTKEquivalent + Parent._CameraLookDir.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
 			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 100000.0F);
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			
 
-			lock(Parent.Entities)
+
+			lock (Parent.Entities)
 			{
 				foreach (Entity entity in Parent.Entities)
 				{
