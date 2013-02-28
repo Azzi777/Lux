@@ -97,6 +97,7 @@ attribute vec3 inPosition;
 attribute vec3 inNormal;
 attribute vec2 inTexcoord;
 
+out vec3 Position;
 out vec3 Normal;
 out vec2 Texcoord;
 
@@ -108,13 +109,15 @@ void main()
 {
 	Normal = inNormal;
 	Texcoord = inTexcoord;
-
+	Position = inPosition;
+	
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
 }";
 
 		static internal string TextureFragmentShaderSource = @"
 #version 150
 #extension GL_EXT_gpu_shader4 : enable
+in vec3 Position;
 in vec3 Normal;
 in vec2 Texcoord;
 
@@ -126,7 +129,16 @@ uniform sampler2DArray textureArray;
 
 void main()
 {
-	outColor = vec4(vec3(abs(dot(Normal, normalize(vec3(-1.0, -3.0, -2.0))))), 1.0); //vec4(textureID.x / 35, textureID.x / 35, textureID.x / 35, 1.0); 
+	vec3 lightVec = normalize(vec3(1.0, 3.0, 2.0));
+
+	float brightness = abs(dot(lightVec, Normal));
+
+	vec3 color = vec3(1.0);
+
+	outColor = vec4(color * brightness, 1.0); 
+
+
+	//vec4(textureID.x / 35, textureID.x / 35, textureID.x / 35, 1.0); 
 	//outColor = texture2DArray(textureArray, vec3(0.0, 0.0, 0.0));
 }";
 	}
