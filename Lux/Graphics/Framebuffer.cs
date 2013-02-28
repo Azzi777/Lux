@@ -11,29 +11,29 @@ namespace Lux.Graphics
 	internal class Framebuffer
 	{
 		public int ID;
-		public int TextureID;
+		public int ColorBufferID;
+		public int DepthBufferID;
 
 		public Framebuffer(int width, int height)
 		{
-			int depthbuffer;
+			int samples = 16;
 
-			// Create framebuffer
+			GL.GenTextures(1, out ColorBufferID);
+			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorBufferID);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.Rgb, width, height, false);
+
+			GL.GenTextures(1, out DepthBufferID);
+			GL.BindTexture(TextureTarget.Texture2DMultisample, DepthBufferID);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.DepthComponent, width, height, false);
+
 			GL.GenFramebuffers(1, out ID);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
 
-			// Create depthbuffer
-			GL.GenRenderbuffers(1, out depthbuffer);
-			GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, depthbuffer);
-			GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent32, width, height);
-			GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, depthbuffer);
+			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, ColorBufferID, 0);
+			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, DepthBufferID, 0);
+			FramebufferErrorCode stanEnum = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 
-			// Create texture
-			GL.GenTextures(1, out TextureID);
-			GL.BindTexture(TextureTarget.Texture2D, TextureID);
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureID, 0);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		}
 	}
 }
