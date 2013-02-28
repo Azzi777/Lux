@@ -8,22 +8,14 @@ namespace Lux.Framework
 	public struct Matrix3
 	{
 		#region - Data -
-		public double[,] Data;
+		double[,] Data;
 
-		public double this[int i]
-		{
-			get
-			{
-				if (Data == null) Data = new double[3, 3];
-				return Data[i % 3, i / 3];
-			}
-			set
-			{
-				if (Data == null) Data = new double[3, 3];
-				Data[i % 3, i / 3] = value;
-			}
-		}
-
+		/// <summary>
+		/// Gets or sets values in the matrix through a i and j coordinate.
+		/// </summary>
+		/// <param name="i">i coordinate</param>
+		/// <param name="j">j coordinate</param>
+		/// <returns></returns>
 		public double this[int i, int j]
 		{
 			get
@@ -55,6 +47,10 @@ namespace Lux.Framework
 		#endregion
 
 		#region - Constructors -
+		/// <summary>
+		/// Creates a new matrix with the specified values.
+		/// </summary>
+		/// <param name="data">Array of values. (Must be 3x3!)</param>
 		public Matrix3(double[,] data)
 		{
 			if (data.GetLength(0) != 3 || data.GetLength(1) != 3)
@@ -65,6 +61,9 @@ namespace Lux.Framework
 			Data = data;
 		}
 
+		/// <summary>
+		/// Creates a new matrix with the specified values.
+		/// </summary>
 		public Matrix3(double d11, double d12, double d13, double d21, double d22, double d23, double d31, double d32, double d33)
 		{
 			Data = new double[3, 3];
@@ -133,21 +132,42 @@ namespace Lux.Framework
 		#endregion
 
 		#region - Creators -
+		/// <summary>
+		/// Creates a rotation matrix around the X-axis.
+		/// </summary>
+		/// <param name="angle">The angle of rotation.</param>
+		/// <returns>A rotation matrix</returns>
 		static public Matrix3 CreateRotationX(double angle)
 		{
 			return new Matrix3(1, 0, 0, 0, Math.Cos(angle), -Math.Sin(angle), 0, Math.Sin(angle), Math.Cos(angle));
 		}
 
+		/// <summary>
+		/// Creates a rotation matrix around the Y-axis.
+		/// </summary>
+		/// <param name="angle">The angle of rotation.</param>
+		/// <returns>A rotation matrix</returns>
 		static public Matrix3 CreateRotationY(double angle)
 		{
 			return new Matrix3(Math.Cos(angle), 0, Math.Sin(angle), 0, 1, 0, -Math.Sin(angle), 0, Math.Cos(angle));
 		}
 
+		/// <summary>
+		/// Creates a rotation matrix around the Z-axis.
+		/// </summary>
+		/// <param name="angle">The angle of rotation.</param>
+		/// <returns>A rotation matrix</returns>
 		static public Matrix3 CreateRotationZ(double angle)
 		{
 			return new Matrix3(Math.Cos(angle), -Math.Sin(angle), 0, Math.Sin(angle), Math.Cos(angle), 0, 0, 0, 1);
 		}
 
+		/// <summary>
+		/// Creates a rotation matrix around the specified axis.
+		/// </summary>
+		/// <param name="axis">A unit vector specifying the axis of rotation.</param>
+		/// <param name="angle">The angle of rotation.</param>
+		/// <returns>A rotation matrix</returns>
 		static public Matrix3 CreateFromAxisAngle(Vector3 axis, double angle)
 		{
 			double x = axis.X;
