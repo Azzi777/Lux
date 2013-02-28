@@ -35,15 +35,15 @@ namespace Test
 
 			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += engine.CameraLookDir * 10.0; });
 			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= engine.CameraLookDir * 10.0; });
-			//engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition += Vector3.NegZ * 10.0; });
-			//engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += Vector3.NegX * 10.0; });
+			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition -= engine.CameraLookDir.Cross(Vector3.Up) * 10.0; });
+			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += engine.CameraLookDir.Cross(Vector3.Up) * 10.0; });
 			//engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.PosY * 10.0; });
 			//engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition += Vector3.NegY * 10.0; });
 
-			engine.Input.BindKeyHold(Key.Q, () => { yaw -= 0.05; if (yaw < 0) yaw += Math.PI * 2; });
-			engine.Input.BindKeyHold(Key.E, () => { yaw += 0.05; if (yaw >= Math.PI * 2) yaw -= Math.PI * 2; });
-			engine.Input.BindKeyHold(Key.R, () => { pitch += 0.05; if (pitch > Math.PI / 2 - 0.00001) pitch = Math.PI / 2 - 0.00001; });
-			engine.Input.BindKeyHold(Key.F, () => { pitch -= 0.05; if (pitch < -Math.PI / 2 + 0.00001) pitch = -Math.PI / 2 + 0.00001; });
+			engine.Input.BindKeyHold(Key.Q, () => { yaw -= 0.03; if (yaw < 0) yaw += Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.E, () => { yaw += 0.03; if (yaw >= Math.PI * 2) yaw -= Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.R, () => { pitch += 0.03; if (pitch > Math.PI / 2 - 0.00001) pitch = Math.PI / 2 - 0.00001; });
+			engine.Input.BindKeyHold(Key.F, () => { pitch -= 0.03; if (pitch < -Math.PI / 2 + 0.00001) pitch = -Math.PI / 2 + 0.00001; });
 
 			engine.Input.BindKeyHold(Key.Escape, () => { engine.Stop(); });
 			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => { Console.WriteLine(e.X + ", " + e.Y); });
