@@ -337,7 +337,7 @@ Ka 0.5880 0.5880 0.5880
 Kd 0.5880 0.5880 0.5880
 Ks 0.0000 0.0000 0.0000
 Ke 0.0000 0.0000 0.0000
-map_Ka textures\vase_hang4ing.tga
+map_Ka textures\vase_hanging.tga
 map_Kd textures\vase_hanging.tga
 
 newmtl vase

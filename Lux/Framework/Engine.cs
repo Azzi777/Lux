@@ -157,13 +157,13 @@ namespace Lux.Framework
 		Stopwatch framerate;
 		internal void Render(double time)
 		{
-			UpdateExposedValues();
 			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+			UpdateExposedValues();
 
 			Graphics.Render(time);
 
 			frames++;
-
 
 			if (framerate == null)
 			{
@@ -180,8 +180,8 @@ namespace Lux.Framework
 
 		internal void Update(double time)
 		{
-			// UpdateExposedValues();
 			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+			UpdateExposedValues();
 
 			Physics.Update(time);
 			Input.Update();

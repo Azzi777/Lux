@@ -12,7 +12,7 @@ namespace Lux.Framework
 	/// </summary>
 	public struct Matrix4
 	{
-		internal Matrix4d OpenTKEquivalent;
+		internal Matrix4d OpenTKEquivalent { get; set; }
 
 		/// <summary>
 		/// The 16-cell data array of the matrix. Each index ranges from 0 to 3.

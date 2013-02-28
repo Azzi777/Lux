@@ -54,49 +54,17 @@ namespace Lux.Graphics
 			VertexCount = TempIndices.Length;
 
 			TempIndices = null;
-
-			if (AmbientTexture != null)
-			{
-				AmbientTexture.Finish();
-			}
-			if (DiffuseTexture != null)
-			{
-				DiffuseTexture.Finish();
-			}
-			if (AlphaTexture != null)
-			{
-				AlphaTexture.Finish();
-			}
-			if (BumpMapTexture != null)
-			{
-				BumpMapTexture.Finish();
-			}
-			if (SpecularHighlightTexture != null)
-			{
-				SpecularHighlightTexture.Finish();
-			}
-			if (SpecularTexture != null)
-			{
-				SpecularTexture.Finish();
-			}
-			if (StencilDecal != null)
-			{
-				StencilDecal.Finish();
-			}
 		}
 
-		public void Render()
+		public void Render(ShaderProgram shaderProgram)
 		{
-			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Ambient, AmbientColor);
-			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Diffuse, DiffuseColor);
-			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Emission, EmissiveColor);
-			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Specular, SpecularColor);
-			GL.Material(MaterialFace.FrontAndBack, MaterialParameter.Shininess, SpecularCoefficient);
-
-			GL.Enable(EnableCap.Texture2D);
 			if (AmbientTexture != null)
 			{
-				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
+				shaderProgram.SetInteger("textureID", AmbientTexture.TextureID);
+			}
+			else if (DiffuseTexture != null)
+			{
+				shaderProgram.SetInteger("textureID", DiffuseTexture.TextureID);
 			}
 
 
@@ -107,36 +75,35 @@ namespace Lux.Graphics
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
 			GL.DisableClientState(ArrayCap.IndexArray);
-			GL.Disable(EnableCap.Texture2D);
 		}
 	}
 
-	//internal struct MeshVertex
-	//{
-	//	MeshPosition Position;
-	//	MeshNormal Normal;
-	//	MeshTexCoord TexCoord;
-
-	//	public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
-	//	{
-	//		Position = pos;
-	//		Normal = norm;
-	//		TexCoord = texcoord;
-	//	}
-
-	//	static public int GetSize()
-	//	{
-	//		return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
-	//	}
-	//}
-
 	internal struct MeshVertex
+	{
+		MeshPosition Position;
+		MeshNormal Normal;
+		MeshTexCoord TexCoord;
+
+		public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
+		{
+			Position = pos;
+			Normal = norm;
+			TexCoord = texcoord;
+		}
+
+		static public int GetSize()
+		{
+			return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
+		}
+	}
+
+	internal struct MeshPosition
 	{
 		float X;
 		float Y;
 		float Z;
 
-		public MeshVertex(float x, float y, float z)
+		public MeshPosition(float x, float y, float z)
 		{
 			X = x;
 			Y = y;
