@@ -42,6 +42,8 @@ namespace Lux.Graphics
 					break;
 				}
 			}
+
+			TempBitmap.Save(@"C:\Users\Azzi777\Desktop\test.png");
 		}
 
 		public void Finish()
@@ -52,15 +54,15 @@ namespace Lux.Graphics
 			}
 
 			System.Drawing.Imaging.BitmapData TextureData =
-			TempBitmap.LockBits(new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			TempBitmap.LockBits(new System.Drawing.Rectangle(0, 0, TempBitmap.Width, TempBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
 			GL.GenTextures(1, out TextureID);
 			GL.BindTexture(TextureTarget.Texture2D, TextureID);
 
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, TempBitmap.Width, TempBitmap.Height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, TextureData.Scan0);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, TempBitmap.Width, TempBitmap.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, TextureData.Scan0);
 
 			GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.LinearMipmapLinear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Linear);
 
 			GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);

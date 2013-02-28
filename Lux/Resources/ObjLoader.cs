@@ -24,9 +24,9 @@ namespace Lux.Resources
 
 			var result = objLoader.Load(new FileStream("sponza.obj", FileMode.Open));
 						
-			MeshVertex[] meshVertices = new MeshVertex[result.Vertices.Count];
-			MeshTexCoord[] meshTexCoords = new MeshTexCoord[result.Vertices.Count];
-			MeshNormal[] meshNormals = new MeshNormal[result.Vertices.Count];
+			List<MeshVertex> meshVertices = new List<MeshVertex>();
+			List<MeshTexCoord> meshTexCoords = new List<MeshTexCoord>();
+			List<MeshNormal> meshNormals = new List<MeshNormal>();
 
 			Dictionary<string, Texture> textures = LoadMTLTextures(result.Materials);
 
@@ -44,20 +44,20 @@ namespace Lux.Resources
 						int texturePointer = face[i].TextureIndex - 1;
 						int normalPointer = face[i].NormalIndex - 1;
 
-						meshIndices.Add((uint)vertexPointer);
+						meshIndices.Add((uint)meshVertices.Count);
 
-						meshVertices[vertexPointer] = new MeshVertex(result.Vertices[vertexPointer].X, result.Vertices[vertexPointer].Y, result.Vertices[vertexPointer].Z);
-						meshTexCoords[vertexPointer] = new MeshTexCoord(result.Textures[texturePointer].X, result.Textures[texturePointer].Y);
-						meshNormals[vertexPointer] = new MeshNormal(result.Normals[normalPointer].X, result.Normals[normalPointer].Y, result.Normals[normalPointer].Z);
+						meshVertices.Add(new MeshVertex(result.Vertices[vertexPointer].X, result.Vertices[vertexPointer].Y, result.Vertices[vertexPointer].Z));
+						meshTexCoords.Add(new MeshTexCoord(result.Textures[texturePointer].X, result.Textures[texturePointer].Y));
+						meshNormals.Add(new MeshNormal(result.Normals[normalPointer].X, result.Normals[normalPointer].Y, result.Normals[normalPointer].Z));
 					}
 
 					if (face.Count == 4)
 					{
-						int vertexPointer1 = face[0].VertexIndex - 1;
-						int vertexPointer2 = face[2].VertexIndex - 1;
+						uint vertexPointer1 = meshIndices[meshIndices.Count - 4];
+						uint vertexPointer2 = meshIndices[meshIndices.Count - 2];
 
-						meshIndices.Insert(meshIndices.Count - 1, (uint)vertexPointer1);
-						meshIndices.Insert(meshIndices.Count - 1, (uint)vertexPointer2);
+						meshIndices.Insert(meshIndices.Count - 1, vertexPointer1);
+						meshIndices.Insert(meshIndices.Count - 1, vertexPointer2);
 					}
 				}
 				Mesh currentMesh = new Mesh(meshIndices.ToArray());
@@ -67,7 +67,7 @@ namespace Lux.Resources
 				meshes.Add(currentMesh);
 			}
 
-			return new Model(meshVertices, meshNormals, meshTexCoords, meshes.ToArray());
+			return new Model(meshVertices.ToArray(), meshNormals.ToArray(), meshTexCoords.ToArray(), meshes.ToArray());
 		}
 
 		static private Dictionary<string, Texture> LoadMTLTextures(IList<ObjLoader.Loader.Data.Material> mtl)
@@ -136,9 +136,9 @@ namespace Lux.Resources
 			{
 				mesh.AlphaTexture = textures[material.AlphaTextureMap];
 			}
-			if (material.AlphaTextureMap != null)
+			if (material.AmbientTextureMap != null)
 			{
-				mesh.AmbientTexture = textures[material.AlphaTextureMap];
+				mesh.AmbientTexture = textures[material.AmbientTextureMap];
 			}
 			if (material.BumpMap != null)
 			{

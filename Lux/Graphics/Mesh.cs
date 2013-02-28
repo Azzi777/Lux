@@ -98,6 +98,10 @@ namespace Lux.Graphics
 			{
 				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
 			}
+			else if (DiffuseTexture != null)
+			{
+				GL.BindTexture(TextureTarget.Texture2D, DiffuseTexture.TextureID);
+			}
 
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);

@@ -52,6 +52,8 @@ namespace Lux.Graphics
 			GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
 			GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
 
+			GL.Enable(EnableCap.Blend);
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Back);
@@ -66,25 +68,10 @@ namespace Lux.Graphics
 				}
 			}
 
-			GL.BindTexture(TextureTarget.Texture2D, 27);
-			GL.Enable(EnableCap.Texture2D);
-
-			GL.Begin(BeginMode.Quads);
-			{
-				GL.Vertex3(0, 100, -1000);
-				GL.TexCoord2(0, 0);
-				GL.Vertex3(0, 1100, -1000);
-				GL.TexCoord2(0, 1);
-				GL.Vertex3(0, 1100, 1000);
-				GL.TexCoord2(1, 1);
-				GL.Vertex3(0, 100, 1000);
-				GL.TexCoord2(1, 0);
-			}
-			GL.End();
-
 			GL.Disable(EnableCap.Light0);
 			GL.Disable(EnableCap.Lighting);
 			GL.Disable(EnableCap.CullFace);
+			GL.Disable(EnableCap.Blend);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
 		}
