@@ -120,14 +120,21 @@ in vec2 Texcoord;
 
 out vec4 outColor;
 
-uniform vec2 textureID;
-
-uniform sampler2DArray textureArray;
+uniform sampler2D tex_ambient;
+uniform sampler2D tex_diffuse;
+uniform sampler2D tex_alpha;
+uniform sampler2D tex_bump;
+uniform sampler2D tex_specular_highlight;
+uniform sampler2D tex_specular;
+uniform sampler2D tex_stencil_decal;
 
 void main()
 {
-	outColor = vec4(vec3(abs(dot(Normal, normalize(vec3(-1.0, -3.0, -2.0))))), 1.0); //vec4(textureID.x / 35, textureID.x / 35, textureID.x / 35, 1.0); 
-	//outColor = texture2DArray(textureArray, vec3(0.0, 0.0, 0.0));
+	outColor = vec4(texture2D(tex_ambient, Texcoord).rgb, 1.0) * vec4(vec3(abs(dot(Normal, normalize(vec3(-1.0, -3.0, -1.0))))), 1.0);
+	if(texture2D(tex_alpha, Texcoord).r == 0 && texture2D(tex_alpha, Texcoord).a == 1)
+	{
+		discard;
+	}
 }";
 	}
 }

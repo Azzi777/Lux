@@ -58,23 +58,84 @@ namespace Lux.Graphics
 
 		public void Render(ShaderProgram shaderProgram)
 		{
-			if (AmbientTexture != null)
-			{
-				shaderProgram.SetInteger("textureID", AmbientTexture.TextureID);
-			}
-			else if (DiffuseTexture != null)
-			{
-				shaderProgram.SetInteger("textureID", DiffuseTexture.TextureID);
-			}
-
+			TextureDefine(shaderProgram);
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-			//GL.EnableClientState(ArrayCap.IndexArray);
-			//GL.IndexPointer(IndexPointerType.Int, sizeof(uint), 0);
 
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
-			//GL.DisableClientState(ArrayCap.IndexArray);
+
+			TextureUndefine(shaderProgram);
+		}
+
+		private void TextureDefine(ShaderProgram shaderProgram)
+		{
+			if (AmbientTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture0);
+				GL.BindTexture(TextureTarget.Texture2D, AmbientTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_ambient"), 0);
+			}
+
+			if (DiffuseTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture1);
+				GL.BindTexture(TextureTarget.Texture2D, DiffuseTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_diffuse"), 1);
+			}
+
+			if (AlphaTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture2);
+				GL.BindTexture(TextureTarget.Texture2D, AlphaTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_alpha"), 2);
+			}
+
+			if (BumpMapTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture3);
+				GL.BindTexture(TextureTarget.Texture2D, BumpMapTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_bump"), 3);
+			}
+
+			if (SpecularHighlightTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture4);
+				GL.BindTexture(TextureTarget.Texture2D, SpecularHighlightTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_specular_highlight"), 4);
+			}
+
+			if (SpecularTexture != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture5);
+				GL.BindTexture(TextureTarget.Texture2D, SpecularTexture.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_specular"), 5);
+			}
+
+			if (StencilDecal != null)
+			{
+				GL.ActiveTexture(TextureUnit.Texture6);
+				GL.BindTexture(TextureTarget.Texture2D, StencilDecal.TextureID);
+				GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "tex_stencil_decal"), 6);
+			}
+		}
+
+		private void TextureUndefine(ShaderProgram shaderProgram)
+		{
+				GL.ActiveTexture(TextureUnit.Texture0);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture1);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture2);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture3);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture4);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture5);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
+				GL.ActiveTexture(TextureUnit.Texture6);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
 		}
 	}
 

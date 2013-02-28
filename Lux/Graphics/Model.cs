@@ -50,7 +50,8 @@ namespace Lux.Graphics
 			
 			TempVertices = null;
 
-			TexturesBufferID = Texture.CreateTexture2DArray(TempTextures);
+			Texture.FinishTextures(TempTextures);
+
 			TempTextures = null;
 
 			foreach (Mesh m in Meshes)
@@ -71,19 +72,12 @@ namespace Lux.Graphics
 			Finish(textureShader);
 			textureShader.SetMatrix4("mat_world", entity.TransformMatrix);
 
-			GL.ActiveTexture(TextureUnit.Texture0);
-			GL.BindTexture(TextureTarget.Texture2DArray, TexturesBufferID);
-
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			//GL.EnableClientState(ArrayCap.VertexArray);
-			//GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
 
 			foreach (Mesh m in Meshes)
 			{
 				m.Render(textureShader);
 			}
-
-			//GL.DisableClientState(ArrayCap.VertexArray);
 		}
 	}
 }
