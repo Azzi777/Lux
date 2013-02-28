@@ -10,6 +10,8 @@ namespace Lux.Framework
 	/// </summary>
 	public struct Vector2
 	{
+		internal OpenTK.Vector2d OpenTKEquivalent { get { return new OpenTK.Vector2d(X, Y); } }
+
 		/// <summary>
 		/// The X-compontent of the vector
 		/// </summary>

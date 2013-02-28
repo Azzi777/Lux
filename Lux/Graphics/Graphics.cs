@@ -16,6 +16,8 @@ namespace Lux.Graphics
 		private Matrix4d View;
 		private Matrix4d Projection;
 
+		internal ShaderProgram TextureShader;
+
 		internal GraphicsEngine(Engine parent)
 		{
 			Parent = parent;
@@ -33,43 +35,37 @@ namespace Lux.Graphics
 			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
 
 			GraphicsContext.CurrentContext.VSync = false;
+
+			TextureShader = new ShaderProgram(ShaderProgram.TextureVertexShaderSource, ShaderProgram.TextureFragmentShaderSource);
+			//TextureShader.SetVertexFormat();
 		}
 
 		internal void Render(double deltaTime)
 		{
-			View = OpenTK.Matrix4d.LookAt(Parent._CameraPosition.OpenTKEquivalent, Parent._CameraPosition.OpenTKEquivalent + Parent._CameraLookDir.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
-			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
-
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadMatrix(ref Projection);
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadMatrix(ref View);
-
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-			GL.Light(LightName.Light0, LightParameter.Position, new Vector4((OpenTK.Vector3)Parent.CameraPosition.OpenTKEquivalent, 1.0F));
-			GL.Light(LightName.Light0, LightParameter.Specular, Color4.White);
-			GL.Light(LightName.Light0, LightParameter.Ambient, Color4.Black);
-			GL.Light(LightName.Light0, LightParameter.Diffuse, Color4.White);
 
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Back);
-			GL.Enable(EnableCap.Lighting);
-			GL.Enable(EnableCap.Light0);
 
+			GL.UseProgram(TextureShader.ID);
+
+			View = OpenTK.Matrix4d.LookAt(Parent._CameraPosition.OpenTKEquivalent, Parent._CameraPosition.OpenTKEquivalent + Parent._CameraLookDir.OpenTKEquivalent, OpenTK.Vector3d.UnitY);
+			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
+
+			TextureShader.SetMatrix4("mat_view", new Lux.Framework.Matrix4(View));
+			TextureShader.SetMatrix4("mat_proj", new Lux.Framework.Matrix4(Projection));
 			lock (Parent.Entities)
 			{
 				foreach (Entity entity in Parent.Entities)
 				{
-					entity.Model.Render(entity);
+					entity.Model.Render(entity, TextureShader);
 				}
 			}
+			GL.UseProgram(0);
 
-			GL.Disable(EnableCap.Light0);
-			GL.Disable(EnableCap.Lighting);
 			GL.Disable(EnableCap.CullFace);
 			GL.Disable(EnableCap.Blend);
 
