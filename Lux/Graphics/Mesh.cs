@@ -60,6 +60,11 @@ namespace Lux.Graphics
 		{
 			TextureDefine(shaderProgram);
 
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_ambient"), AmbientColor);
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_diffuse"), DiffuseColor);
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_specular"), SpecularColor);
+			GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "mat_shininess"), SpecularCoefficient);
+
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
 
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);

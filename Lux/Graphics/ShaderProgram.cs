@@ -45,27 +45,8 @@ namespace Lux.Graphics
 			GL.LinkProgram(ID);
 		}
 
-		public void SetVector3(string varName, Lux.Framework.Vector3 vec3)
-		{
-			int id = GL.GetUniformLocation(ID, varName);
-			GL.Uniform3(id, (Vector3)vec3.OpenTKEquivalent);
-		}
-
-		public void SetVector2(string varName, Lux.Framework.Vector2 vec2)
-		{
-			int id = GL.GetUniformLocation(ID, varName);
-			GL.Uniform2(id, (Vector2)vec2.OpenTKEquivalent);
-		}
-
-		public void SetInteger(string varName, uint integer)
-		{
-			int id = GL.GetUniformLocation(ID, varName);
-			GL.Uniform2(id, (float)integer, 0.0F);
-		}
-
 		public void SetMatrix4(string varName, Lux.Framework.Matrix4 mat4)
 		{
-			int id = GL.GetUniformLocation(ID, varName);
 			float[] temp_mat4 = new float[16] {
 				(float)mat4.OpenTKEquivalent.M11, (float)mat4.OpenTKEquivalent.M12, (float)mat4.OpenTKEquivalent.M13, (float)mat4.OpenTKEquivalent.M14,
 				(float)mat4.OpenTKEquivalent.M21, (float)mat4.OpenTKEquivalent.M22, (float)mat4.OpenTKEquivalent.M23, (float)mat4.OpenTKEquivalent.M24,
@@ -73,7 +54,7 @@ namespace Lux.Graphics
 				(float)mat4.OpenTKEquivalent.M41, (float)mat4.OpenTKEquivalent.M42, (float)mat4.OpenTKEquivalent.M43, (float)mat4.OpenTKEquivalent.M44
 			};
 
-			GL.UniformMatrix4(id, 1, false, temp_mat4);
+			GL.UniformMatrix4(GL.GetUniformLocation(ID, varName), 1, false, temp_mat4);
 		}
 
 		public void SetVertexFormat()
@@ -86,7 +67,7 @@ namespace Lux.Graphics
 			GL.VertexAttribPointer(normAttrib, 3, VertexAttribPointerType.Float, false, 32, 12);
 			GL.EnableVertexAttribArray(normAttrib);
 
-			int texAttrib = GL.GetAttribLocation(ID, "inTexcoord");
+			int texAttrib = GL.GetAttribLocation(ID, "inTexCoord");
 			GL.VertexAttribPointer(texAttrib, 2, VertexAttribPointerType.Float, false, 32, 24);
 			GL.EnableVertexAttribArray(texAttrib);
 		}
@@ -95,28 +76,34 @@ namespace Lux.Graphics
 #version 150
 attribute vec3 inPosition;
 attribute vec3 inNormal;
-attribute vec2 inTexcoord;
+attribute vec2 inTexCoord;
 
-out vec3 Normal;
-out vec2 Texcoord;
+out vec3 normal;
+out vec2 texCoord;
+out vec3 light_dir;
+out vec3 eye_dir;
 
 uniform mat4 mat_world;
 uniform mat4 mat_view;
 uniform mat4 mat_proj;
+uniform vec3 light_pos;
+uniform vec3 eye_pos;
 
 void main()
 {
-	Normal = inNormal;
-	Texcoord = inTexcoord;
+	normal = inNormal;
+	texCoord = inTexCoord;
+
+	light_dir = normalize(inPosition - light_pos);
+	eye_dir = normalize(inPosition - eye_pos);
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
 }";
 
 		static internal string TextureFragmentShaderSource = @"
 #version 150
-#extension GL_EXT_gpu_shader4 : enable
-in vec3 Normal;
-in vec2 Texcoord;
+in vec3 normal;
+in vec2 texCoord;
 
 out vec4 outColor;
 
@@ -128,10 +115,57 @@ uniform sampler2D tex_specular_highlight;
 uniform sampler2D tex_specular;
 uniform sampler2D tex_stencil_decal;
 
+uniform vec4 light_ambient;
+uniform vec4 light_diffuse;
+uniform vec4 light_specular;
+in vec3 light_dir;
+in vec3 eye_dir;
+
+
+uniform vec4 mat_ambient;
+uniform vec4 mat_diffuse;
+uniform vec4 mat_specular;
+uniform float mat_shininess;
+
 void main()
 {
-	outColor = vec4(texture2D(tex_ambient, Texcoord).rgb, 1.0) * vec4(vec3(abs(dot(Normal, normalize(vec3(-1.0, -3.0, -1.0))))), 1.0);
-	if(texture2D(tex_alpha, Texcoord).r == 0 && texture2D(tex_alpha, Texcoord).a == 1)
+//	vec3 tangent;
+//	vec3 binormal;
+//
+//	vec3 c1 = cross(normal, vec3(0.0, 0.0, 1.0));
+//	vec3 c2 = cross(normal, vec3(0.0, 1.0, 0.0));
+//
+//	if (length(c1) > length(c2))
+//	{
+//		tangent = normalize(c1);;
+//	}
+//	else
+//	{
+//		tangent = normalize(c2);;
+//	}
+//
+//	binormal = cross(normal, tangent);
+//	binormal = normalize(binormal);
+//
+//	outColor = vec4(texture2D(tex_ambient, texCoord).rgb * max(dot(normal, normalize(eye_dir + light_dir)), 0.0), 1.0);
+//	return;
+	vec3 normalBump = normalize(texture2D(tex_bump, texCoord).rgb * 2.0 - 1.0);
+
+	vec3 halfVec = (eye_dir + light_dir) / length(eye_dir + light_dir);
+	vec3 tangent = cross(normalBump, vec3(1.0));
+	vec3 biNormal = cross(normalBump, tangent);
+
+	float diffuseCoef = max(dot(light_dir, normalBump), 0.0);
+	float specularCoef = pow(max(dot(halfVec, normalBump), 0.0), mat_shininess);
+
+	vec4 ambient = texture2D(tex_ambient, texCoord) * light_ambient * mat_ambient;
+	vec4 diffuse = texture2D(tex_diffuse, texCoord) * light_diffuse * mat_diffuse * diffuseCoef;
+	vec4 specular = texture2D(tex_specular, texCoord) * light_specular * mat_specular * specularCoef;
+	
+	outColor.rgb = (ambient + diffuse + specular).rgb * abs(dot(light_dir, normal));
+	outColor.a = 1.0;
+
+	if(texture2D(tex_alpha, texCoord).r == 0 && texture2D(tex_alpha, texCoord).a == 1)
 	{
 		discard;
 	}
