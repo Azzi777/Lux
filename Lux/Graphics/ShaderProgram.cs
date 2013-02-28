@@ -103,7 +103,6 @@ out vec2 Texcoord;
 uniform mat4 mat_world;
 uniform mat4 mat_view;
 uniform mat4 mat_proj;
-uniform int textureID;
 
 void main()
 {
@@ -112,10 +111,6 @@ void main()
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
 
-if(textureID != 0)
-{
-discard;
-}
 }";
 
 		static internal string TextureFragmentShaderSource = @"
@@ -125,6 +120,7 @@ in vec3 Normal;
 in vec2 Texcoord;
 
 out vec4 outColor;
+uniform int textureID;
 
 
 //uniform sampler2DArray textureArray;
@@ -133,6 +129,10 @@ void main()
 {
 	outColor = vec4(1.0);//vec4(float(textureID) / 35, float(textureID) / 35, float(textureID) / 35, 1.0); //texture2DArray(textureArray, vec3(Texcoord, textureID));
 
+if(textureID == 1)
+{
+discard;
+}
 }";
 	}
 }
