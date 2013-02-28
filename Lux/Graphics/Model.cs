@@ -14,7 +14,7 @@ namespace Lux.Graphics
 	{
 		private bool IsFinished { get; set; }
 
-		Mesh[] Meshes;
+		internal Mesh[] Meshes; // Fjern
 
 		uint VertexBufferID;
 

@@ -60,6 +60,7 @@
     <Compile Include="Framework\Vector3.cs" />
     <Compile Include="Framework\Window.cs" />
     <Compile Include="Framework\Color.cs" />
+    <Compile Include="Graphics\Framebuffer.cs" />
     <Compile Include="Graphics\Graphics.cs" />
     <Compile Include="Graphics\Mesh.cs" />
     <Compile Include="Graphics\Model.cs" />

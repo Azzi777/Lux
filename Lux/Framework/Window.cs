@@ -16,7 +16,7 @@ namespace Lux.Framework
 	{
 		private Engine Parent;
 
-		public Window(Engine parent) : base(1024, 768, new GraphicsMode(32, 24, 8, 16))
+		public Window(Engine parent) : base(1024, 768, new GraphicsMode(32, 24, 8, 0))
 		{
 			Parent = parent;
 		}
