@@ -20,11 +20,11 @@ namespace Lux.Graphics
 		uint NormalBufferID;
 		uint TextureBufferID;
 
-		MeshPosition[] TempVertices;
+		MeshVertex[] TempVertices;
 		MeshNormal[] TempNormals;
 		MeshTexCoord[] TempTexCoords;
 
-		public Model(MeshPosition[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, Mesh[] meshes)
+		public Model(MeshVertex[] vertices, MeshNormal[] normals, MeshTexCoord[] texCoords, Mesh[] meshes)
 		{
 			TempVertices = vertices;
 			TempNormals = normals;
@@ -44,7 +44,7 @@ namespace Lux.Graphics
 
 			GL.GenBuffers(1, out VertexBufferID);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(TempVertices.Length * MeshPosition.GetSize()), TempVertices, BufferUsageHint.StaticDraw);
+			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(TempVertices.Length * MeshVertex.GetSize()), TempVertices, BufferUsageHint.StaticDraw);
 
 			GL.GenBuffers(1, out NormalBufferID);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
@@ -80,7 +80,7 @@ namespace Lux.Graphics
 
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
 			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.VertexPointer(3, VertexPointerType.Float, MeshPosition.GetSize(), 0);
+			GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
 
 			GL.BindBuffer(BufferTarget.ArrayBuffer, NormalBufferID);
 			GL.EnableClientState(ArrayCap.NormalArray);

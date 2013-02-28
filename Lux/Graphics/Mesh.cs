@@ -111,32 +111,32 @@ namespace Lux.Graphics
 		}
 	}
 
+	//internal struct MeshVertex
+	//{
+	//	MeshPosition Position;
+	//	MeshNormal Normal;
+	//	MeshTexCoord TexCoord;
+
+	//	public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
+	//	{
+	//		Position = pos;
+	//		Normal = norm;
+	//		TexCoord = texcoord;
+	//	}
+
+	//	static public int GetSize()
+	//	{
+	//		return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
+	//	}
+	//}
+
 	internal struct MeshVertex
-	{
-		MeshPosition Position;
-		MeshNormal Normal;
-		MeshTexCoord TexCoord;
-
-		public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
-		{
-			Position = pos;
-			Normal = norm;
-			TexCoord = texcoord;
-		}
-
-		static public int GetSize()
-		{
-			return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
-		}
-	}
-
-	internal struct MeshPosition
 	{
 		float X;
 		float Y;
 		float Z;
 
-		public MeshPosition(float x, float y, float z)
+		public MeshVertex(float x, float y, float z)
 		{
 			X = x;
 			Y = y;
