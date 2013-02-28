@@ -12,13 +12,11 @@ namespace Lux.Framework
 		public double Pitch { get; set; }
 		public double Roll { get; set; }
 
-		public Vector3 GetForwards
+		public Matrix3 GetRotationMatrix
 		{
 			get
 			{
-				Matrix3 rot = Matrix3.CreateRotationY(Yaw) * Matrix3.CreateRotationX(Pitch) * Matrix3.CreateRotationZ(Roll);
-
-				return rot * Vector3.Forwards;
+				return Matrix3.CreateRotationY(Yaw) * Matrix3.CreateRotationX(Pitch) * Matrix3.CreateRotationZ(Roll);
 			}
 		}
 

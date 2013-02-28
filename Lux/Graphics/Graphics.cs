@@ -37,7 +37,6 @@ namespace Lux.Graphics
 			GraphicsContext.CurrentContext.VSync = false;
 
 			TextureShader = new ShaderProgram(ShaderProgram.TextureVertexShaderSource, ShaderProgram.TextureFragmentShaderSource);
-			TextureShader.SetVertexFormat();
 		}
 
 		internal void Render(double deltaTime)
@@ -47,8 +46,8 @@ namespace Lux.Graphics
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-			//GL.Enable(EnableCap.CullFace);
-			//GL.CullFace(CullFaceMode.Back);
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Back);
 
 			GL.UseProgram(TextureShader.ID);
 
@@ -66,7 +65,7 @@ namespace Lux.Graphics
 			}
 			GL.UseProgram(0);
 
-			//GL.Disable(EnableCap.CullFace);
+			GL.Disable(EnableCap.CullFace);
 			GL.Disable(EnableCap.Blend);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
