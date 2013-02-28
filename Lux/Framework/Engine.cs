@@ -26,7 +26,7 @@ namespace Lux.Framework
 		internal Vector3 _CameraPosition;
 
 		public Vector3 CameraLookDir;
-		internal Vector3 _CameraLookDir;
+		internal Vector3 _CameraLookat;
 		#endregion
 
 		#region - Properties -
@@ -193,7 +193,7 @@ namespace Lux.Framework
 
 		private void UpdateExposedValues()
 		{
-			_CameraLookDir = CameraLookDir;
+			_CameraLookat = CameraLookDir;
 			_CameraPosition = CameraPosition;
 		}
 		#endregion
