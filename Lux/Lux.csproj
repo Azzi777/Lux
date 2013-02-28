@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\Camera.cs" />
     <Compile Include="Framework\Engine.cs" />
     <Compile Include="Framework\Entity.cs" />
     <Compile Include="Framework\IStage.cs" />
