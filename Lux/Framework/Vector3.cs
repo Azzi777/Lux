@@ -273,6 +273,13 @@ namespace Lux.Framework
 			return Vector3.Dot(this, vec);
 		}
 
+		public void Transform(Matrix3 mat)
+		{
+			double newX = mat.Data[0, 0] * X + mat.Data[1, 0] * Y + mat.Data[2, 0] * Z;
+			double newY = mat.Data[0, 1] * X + mat.Data[1, 1] * Y + mat.Data[2, 1] * Z;
+			double newZ = mat.Data[0, 2] * X + mat.Data[1, 2] * Y + mat.Data[2, 2] * Z;
+		}
+
 		/// <summary>
 		/// Returns a nicely formatted string form the vector.
 		/// </summary>

@@ -172,7 +172,7 @@ namespace Lux.Framework
 
 			ForceAccumulator = Vector3.Zero;
 
-			Vector3 AngularAcceleration = InertiaTensor.Transform(TorqueAccumulator);
+			Vector3 AngularAcceleration = InertiaTensor * TorqueAccumulator;
 			AngularVelocity *= new Quaternion(AngularAcceleration * deltaTime);
 			AngularVelocity.Normalize();
 

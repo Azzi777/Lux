@@ -331,18 +331,18 @@ namespace Lux.Input
 	{
 		public int X;
 		public int Y;
-		public int XDelta;
-		public int YDelta;
-		public int WheelDelta;
+		public int DeltaX;
+		public int DeltaY;
+		public int DeltaWheel;
 		public int WheelPosition;
 
 		public MouseEventArguments(int x, int y, int dx, int dy, int dw, int wp)
 		{
 			X = x;
 			Y = y;
-			XDelta = dx;
-			YDelta = dy;
-			WheelDelta = dw;
+			DeltaX = dx;
+			DeltaY = dy;
+			DeltaWheel = dw;
 			WheelPosition = wp;
 		}
 	}

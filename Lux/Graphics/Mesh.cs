@@ -69,12 +69,12 @@ namespace Lux.Graphics
 
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-			GL.EnableClientState(ArrayCap.IndexArray);
-			GL.IndexPointer(IndexPointerType.Int, sizeof(uint), 0);
+			//GL.EnableClientState(ArrayCap.IndexArray);
+			//GL.IndexPointer(IndexPointerType.Int, sizeof(uint), 0);
 
 			GL.DrawElements(BeginMode.Triangles, VertexCount, DrawElementsType.UnsignedInt, 0);
 
-			GL.DisableClientState(ArrayCap.IndexArray);
+			//GL.DisableClientState(ArrayCap.IndexArray);
 		}
 	}
 

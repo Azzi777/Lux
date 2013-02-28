@@ -43,8 +43,6 @@ namespace Lux.Graphics
 					break;
 				}
 			}
-
-			TempBitmap.Save(@"C:\Users\Azzi777\Desktop\test.png");
 		}
 
 		static public uint CreateTexture2DArray(Texture[] textures)

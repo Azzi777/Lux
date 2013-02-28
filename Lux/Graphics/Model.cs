@@ -31,16 +31,23 @@ namespace Lux.Graphics
 			IsFinished = false;
 		}
 
-		private void Finish()
+		private void Finish(ShaderProgram textureShader)
 		{
 			if (IsFinished)
 			{
 				return;
 			}
 
+			int ArrayID;
+			GL.GenVertexArrays(1, out ArrayID);
+			GL.BindVertexArray(ArrayID);
 			GL.GenBuffers(1, out VertexBufferID);
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(TempVertices.Length * MeshVertex.GetSize()), TempVertices, BufferUsageHint.StaticDraw);
+
+			GL.BufferData<MeshVertex>(BufferTarget.ArrayBuffer, (IntPtr)(TempVertices.Length * MeshVertex.GetSize()), TempVertices, BufferUsageHint.StaticDraw);
+
+			textureShader.SetVertexFormat();
+			
 			TempVertices = null;
 
 			TexturesBufferID = Texture.CreateTexture2DArray(TempTextures);
@@ -61,22 +68,22 @@ namespace Lux.Graphics
 
 		public void Render(Entity entity, ShaderProgram textureShader)
 		{
-			Finish();
+			Finish(textureShader);
 			textureShader.SetMatrix4("mat_world", entity.TransformMatrix);
 
-			//GL.ActiveTexture(TextureUnit.Texture0);
-			//GL.BindTexture(TextureTarget.Texture3D, TexturesBufferID);
+			GL.ActiveTexture(TextureUnit.Texture0);
+			GL.BindTexture(TextureTarget.Texture2DArray, TexturesBufferID);
 
 			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferID);
-			GL.EnableClientState(ArrayCap.VertexArray);
-			GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
+			//GL.EnableClientState(ArrayCap.VertexArray);
+			//GL.VertexPointer(3, VertexPointerType.Float, MeshVertex.GetSize(), 0);
 
 			foreach (Mesh m in Meshes)
 			{
 				m.Render(textureShader);
 			}
 
-			GL.DisableClientState(ArrayCap.VertexArray);
+			//GL.DisableClientState(ArrayCap.VertexArray);
 		}
 	}
 }

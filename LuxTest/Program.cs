@@ -27,43 +27,44 @@ namespace Test
 			Entity sponza = engine.CreateEntity(@"models\sponza.obj", "ent.phys");
 			Console.WriteLine("Done!");
 
-			engine.CameraPosition = new Vector3(500, 500, 0);
-			engine.CameraLookDir = Vector3.NegX;
+			engine.Camera = new Camera(0.0, 0.0, 0.0);
+			engine.Camera.Position = new Vector3(500, 500, 0);
 
-			double pitch = 0.0;
-			double yaw = Math.PI;
+			engine.Input.BindKeyHold(Key.W, () => { engine.Camera.Position += engine.Camera.GetRotationMatrix * Vector3.Forwards * 10.0; });
+			engine.Input.BindKeyHold(Key.S, () => { engine.Camera.Position += engine.Camera.GetRotationMatrix * Vector3.Backwards * 10.0; });
+			engine.Input.BindKeyHold(Key.A, () => { engine.Camera.Position += engine.Camera.GetRotationMatrix * Vector3.Left * 10.0; });
+			engine.Input.BindKeyHold(Key.D, () => { engine.Camera.Position += engine.Camera.GetRotationMatrix * Vector3.Right * 10.0; });
+			engine.Input.BindKeyHold(Key.Space, () => { engine.Camera.Position += Vector3.Up * 10.0; });
+			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.Camera.Position += Vector3.Down * 10.0; });
 
-			engine.Input.BindKeyHold(Key.W, () => { engine.CameraPosition += engine.CameraLookDir * 10.0; });
-			engine.Input.BindKeyHold(Key.S, () => { engine.CameraPosition -= engine.CameraLookDir * 10.0; });
-			engine.Input.BindKeyHold(Key.A, () => { engine.CameraPosition -= engine.CameraLookDir.Cross(Vector3.Up) * 10.0; });
-			engine.Input.BindKeyHold(Key.D, () => { engine.CameraPosition += engine.CameraLookDir.Cross(Vector3.Up) * 10.0; });
-			engine.Input.BindKeyHold(Key.Space, () => { engine.CameraPosition += Vector3.PosY * 10.0; });
-			engine.Input.BindKeyHold(Key.LeftShift, () => { engine.CameraPosition += Vector3.NegY * 10.0; });
-
-			engine.Input.BindKeyHold(Key.Q, () => { yaw -= 0.03; if (yaw < 0) yaw += Math.PI * 2; });
-			engine.Input.BindKeyHold(Key.E, () => { yaw += 0.03; if (yaw >= Math.PI * 2) yaw -= Math.PI * 2; });
-			engine.Input.BindKeyHold(Key.R, () => { pitch += 0.03; if (pitch > Math.PI / 2 - 0.00001) pitch = Math.PI / 2 - 0.00001; });
-			engine.Input.BindKeyHold(Key.F, () => { pitch -= 0.03; if (pitch < -Math.PI / 2 + 0.00001) pitch = -Math.PI / 2 + 0.00001; });
+			engine.Input.BindKeyHold(Key.Q, () => { engine.Camera.Yaw += 0.03; if (engine.Camera.Yaw < 0) engine.Camera.Yaw += Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.E, () => { engine.Camera.Yaw -= 0.03; if (engine.Camera.Yaw >= Math.PI * 2) engine.Camera.Yaw -= Math.PI * 2; });
+			engine.Input.BindKeyHold(Key.R, () => { engine.Camera.Pitch += 0.03; if (engine.Camera.Pitch > Math.PI / 2) engine.Camera.Pitch = Math.PI / 2; });
+			engine.Input.BindKeyHold(Key.F, () => { engine.Camera.Pitch -= 0.03; if (engine.Camera.Pitch < -Math.PI / 2) engine.Camera.Pitch = -Math.PI / 2; });
 
 			engine.Input.BindKeyHold(Key.Escape, () => { engine.Stop(); });
-			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => { 
+			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => 
+			{
+				engine.Camera.Yaw -= e.DeltaX * 0.03; 
+				if (engine.Camera.Yaw < 0) engine.Camera.Yaw += Math.PI * 2;
+				if (engine.Camera.Yaw >= Math.PI * 2) engine.Camera.Yaw -= Math.PI * 2;
+
+				engine.Camera.Pitch -= e.DeltaY  * 0.03;
+				if (engine.Camera.Pitch > Math.PI / 2) engine.Camera.Pitch = Math.PI / 2;
+				if (engine.Camera.Pitch < -Math.PI / 2) engine.Camera.Pitch = -Math.PI / 2;
+
 				Console.WriteLine(e.X + ", " + e.Y); 
-				yaw += e.XDelta * 0.03; 
-				if (yaw < 0) yaw += Math.PI * 2; 
-				if (yaw >= Math.PI * 2) yaw -= Math.PI * 2;
-				pitch -= e.YDelta * 0.03; 
-				if (pitch > Math.PI / 2 - 0.00001) pitch = Math.PI / 2 - 0.00001;
-				if (pitch < -Math.PI / 2 + 0.00001) pitch = -Math.PI / 2 + 0.00001; 
 			});
 			engine.Input.BindMouseEvent(MouseEvent.WheelMove, (MouseEventArguments e) => { Console.WriteLine(e.WheelPosition); });
 
 			Stopwatch timer = new Stopwatch();
+			double d = 0;
+
 
 			while (engine.IsRunning)
 			{
-				engine.CameraLookDir = new Vector3(Math.Cos(yaw) * Math.Cos(pitch), Math.Sin(pitch), Math.Sin(yaw) * Math.Cos(pitch));
-
 				timer.Restart();
+				d += 0.00501;
 
 				while (timer.Elapsed.TotalMilliseconds < 1) ;
 			}

@@ -60,7 +60,7 @@ namespace Lux.Graphics
 		public void SetInteger(string varName, uint integer)
 		{
 			int id = GL.GetUniformLocation(ID, varName);
-			GL.Uniform1(id, integer);
+			GL.Uniform2(id, (float)integer, 0.0F);
 		}
 
 		public void SetMatrix4(string varName, Lux.Framework.Matrix4 mat4)
@@ -93,9 +93,9 @@ namespace Lux.Graphics
 
 		static internal string TextureVertexShaderSource = @"
 #version 150
-in vec3 inPosition;
-in vec3 inNormal;
-in vec2 inTexcoord;
+attribute vec3 inPosition;
+attribute vec3 inNormal;
+attribute vec2 inTexcoord;
 
 out vec3 Normal;
 out vec2 Texcoord;
@@ -110,29 +110,24 @@ void main()
 	Texcoord = inTexcoord;
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
-
 }";
 
 		static internal string TextureFragmentShaderSource = @"
 #version 150
-//#extension GL_EXT_gpu_shader4 : enable
+#extension GL_EXT_gpu_shader4 : enable
 in vec3 Normal;
 in vec2 Texcoord;
 
 out vec4 outColor;
-uniform int textureID;
 
+uniform vec2 textureID;
 
-//uniform sampler2DArray textureArray;
+uniform sampler2DArray textureArray;
 
 void main()
 {
-	outColor = vec4(1.0);//vec4(float(textureID) / 35, float(textureID) / 35, float(textureID) / 35, 1.0); //texture2DArray(textureArray, vec3(Texcoord, textureID));
-
-if(textureID == 1)
-{
-discard;
-}
+	outColor = vec4(vec3(abs(dot(Normal, normalize(vec3(-1.0, -3.0, -2.0))))), 1.0); //vec4(textureID.x / 35, textureID.x / 35, textureID.x / 35, 1.0); 
+	//outColor = texture2DArray(textureArray, vec3(0.0, 0.0, 0.0));
 }";
 	}
 }
