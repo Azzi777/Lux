@@ -9,40 +9,65 @@ namespace Lux.Graphics
 	{
 		public int ID { get; private set; }
 
+		public ShaderProgram(string fragmentShader)
+		{
+			ID = GL.CreateProgram();
+
+			int fID = CompileShader(fragmentShader, ShaderType.FragmentShader);
+			GL.AttachShader(ID, fID);
+
+			GL.LinkProgram(ID);
+
+			string info = GL.GetProgramInfoLog(ID);
+			System.Console.WriteLine(info);
+
+			if (fID != 0)
+			{
+				GL.DeleteShader(fID);
+			}
+		}
+
 		public ShaderProgram(string vertexShader, string fragmentShader)
 		{
 			ID = GL.CreateProgram();
 
-			int vID = GL.CreateShader(ShaderType.VertexShader);
-			GL.ShaderSource(vID, vertexShader);
-			GL.CompileShader(vID);
-
-			int compileResult;
-			GL.GetShader(vID, ShaderParameter.CompileStatus, out compileResult);
-			if (compileResult != 1)
-			{
-				string error = GL.GetShaderInfoLog(vID);
-				throw new Exception("Error while compiling the vertex shader. \n\nError message: \"" + error + "\"");
-			}
-
+			int vID = CompileShader(vertexShader, ShaderType.VertexShader);
 			GL.AttachShader(ID, vID);
 
-			int fID = GL.CreateShader(ShaderType.FragmentShader);
-			GL.ShaderSource(fID, fragmentShader);
-			GL.CompileShader(fID);
-
-
-
-			GL.GetShader(fID, ShaderParameter.CompileStatus, out compileResult);
-			if (compileResult != 1)
-			{
-				string error = GL.GetShaderInfoLog(fID);
-				throw new Exception("Error while compiling the fragment shader. \n\nError message: \"" + error + "\"");
-			}
-
+			int fID = CompileShader(fragmentShader, ShaderType.FragmentShader);
 			GL.AttachShader(ID, fID);
 
 			GL.LinkProgram(ID);
+
+			string info = GL.GetProgramInfoLog(ID);
+			System.Console.WriteLine(info);
+
+			if (vID != 0)
+			{
+				GL.DeleteShader(vID);
+			}
+
+			if (fID != 0)
+			{
+				GL.DeleteShader(fID);
+			}
+		}
+
+		int CompileShader(string source, ShaderType type)
+		{
+			int id = GL.CreateShader(type);
+			GL.ShaderSource(id, source);
+			GL.CompileShader(id);
+
+			int compileResult;
+			GL.GetShader(id, ShaderParameter.CompileStatus, out compileResult);
+			if (compileResult != 1)
+			{
+				string error = GL.GetShaderInfoLog(id);
+				throw new Exception("Error while compiling the vertex shader. \n\nError message: \"" + error + "\"");
+			}
+
+			return id;
 		}
 
 		public void SetVector3(string varName, Lux.Framework.Vector3 vec3)
@@ -114,7 +139,6 @@ void main()
 
 		static internal string TextureFragmentShaderSource = @"
 #version 150
-#extension GL_EXT_gpu_shader4 : enable
 in vec3 Normal;
 in vec2 Texcoord;
 
@@ -135,6 +159,22 @@ void main()
 	{
 		discard;
 	}
+}";
+
+		static internal string ScreenFragmentShaderSource = @"
+#version 150
+
+out vec4 outColor;
+
+uniform sampler2D colorTexture;
+
+void main()
+{
+	vec2 texcoord = gl_FragCoord.xy / vec2(1024.0, 768.0);
+
+	vec3 color = texture2D( colorTexture, texcoord );
+	
+	outColor = vec4(color, 1.0);
 }";
 	}
 }

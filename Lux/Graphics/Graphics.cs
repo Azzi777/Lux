@@ -17,6 +17,9 @@ namespace Lux.Graphics
 		private Matrix4d Projection;
 
 		internal ShaderProgram TextureShader;
+		internal ShaderProgram ScreenShader;
+
+		Framebuffer ColorFramebuffer;
 
 		internal GraphicsEngine(Engine parent)
 		{
@@ -31,16 +34,19 @@ namespace Lux.Graphics
 			GL.Enable(EnableCap.DepthTest);
 			GL.ClearColor(Color4.CornflowerBlue);
 
-			View = Parent.Camera.OpenTKViewMatrix;
-			Projection = Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
-
 			GraphicsContext.CurrentContext.VSync = false;
 
 			TextureShader = new ShaderProgram(ShaderProgram.TextureVertexShaderSource, ShaderProgram.TextureFragmentShaderSource);
+			ScreenShader = new ShaderProgram(ShaderProgram.ScreenFragmentShaderSource);
+
+			ColorFramebuffer = new Framebuffer(Parent.Window.Width, Parent.Window.Height);
 		}
 
 		internal void Render(double deltaTime)
 		{
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ColorFramebuffer.ID);
+
+			GL.ClearColor(Color.CornflowerBlue.GetSystemEquivalent());
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			GL.Enable(EnableCap.Blend);
@@ -52,7 +58,7 @@ namespace Lux.Graphics
 			GL.UseProgram(TextureShader.ID);
 
 			View = Parent.Camera.OpenTKViewMatrix;
-			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
+			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 10.0F, 10000.0F);
 
 			TextureShader.SetMatrix4("mat_view", new Lux.Framework.Matrix4(View));
 			TextureShader.SetMatrix4("mat_proj", new Lux.Framework.Matrix4(Projection));
@@ -67,6 +73,31 @@ namespace Lux.Graphics
 
 			GL.Disable(EnableCap.CullFace);
 			GL.Disable(EnableCap.Blend);
+
+
+			// Render to screen
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			GL.ClearColor(Color4.BlueViolet);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+			GL.Enable(EnableCap.Texture2D);
+
+			GL.UseProgram(ScreenShader.ID);
+
+			GL.ActiveTexture(TextureUnit.Texture0);
+			GL.BindTexture(TextureTarget.Texture2D, ColorFramebuffer.TextureID);
+			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "colorTexture"), 0);
+
+
+			GL.Begin(BeginMode.Quads);
+			{
+				GL.Vertex2(-1, -1);
+				GL.Vertex2(1, -1);
+				GL.Vertex2(1, 1);
+				GL.Vertex2(-1, 1);
+			}
+			GL.End();
+			GL.Disable(EnableCap.Texture2D);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
 		}
