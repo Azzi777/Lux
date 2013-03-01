@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="Multisamples" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">16</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -16,11 +16,9 @@ namespace Lux.Graphics
 
 		public Framebuffer(int width, int height)
 		{
-			GL.GetString(StringName.Extensions).Contains("GL_ARB_texture_multisample");
-
 			GL.GenTextures(1, out ColorBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorBufferID);
-			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgb, width, height, false);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgba32f, width, height, false);
 
 			GL.GenTextures(1, out DepthBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, DepthBufferID);
@@ -33,7 +31,7 @@ namespace Lux.Graphics
 			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2DMultisample, DepthBufferID, 0);
 			FramebufferErrorCode stanEnum = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			GL.Ext.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		}
 	}
 }

@@ -25,7 +25,7 @@ namespace Lux.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
         public int Multisamples {
             get {
                 return ((int)(this["Multisamples"]));
