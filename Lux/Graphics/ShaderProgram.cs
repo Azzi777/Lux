@@ -68,7 +68,7 @@ namespace Lux.Graphics
 			}
 
 			return id;
-		}
+		} 
 
 		public void SetMatrix4(string varName, Lux.Framework.Matrix4 mat4)
 		{
@@ -119,7 +119,7 @@ void main()
 	normal = inNormal;
 	texCoord = inTexCoord;
 
-	light_dir = normalize(vec3(2.0, 3.0, 1.0));//normalize(inPosition - light_pos);
+	light_dir = normalize(light_pos - inPosition);
 	eye_dir = normalize(inPosition - eye_pos);
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
@@ -174,27 +174,34 @@ void main()
 //
 //	outColor = vec4(texture2D(tex_ambient, texCoord).rgb * max(dot(normal, normalize(eye_dir + light_dir)), 0.0), 1.0);
 //	return;
-	vec3 normalBump = normalize(texture2D(tex_bump, texCoord).rgb * 2.0 - 1.0);
+	vec3 normalBump = (texture2D(tex_bump, texCoord).rgb * 2.0 - 1.0);
 
-	vec3 halfVec = (eye_dir + light_dir) / length(eye_dir + light_dir);
+	vec3 halfVec = normalize(eye_dir + light_dir);
 	vec3 tangent = cross(normalBump, vec3(1.0));
 	vec3 biNormal = cross(normalBump, tangent);
 
-	float diffuseCoef = max(dot(light_dir, normalBump), 0.0);
-	float specularCoef = pow(max(dot(halfVec, normalBump), 0.0), mat_shininess);
+	float diffuseCoef = clamp(dot(light_dir, normalBump), 0.0, 1.0);
+	float specularCoef = pow(clamp(dot(normal, halfVec), 0.0, 1.0), mat_shininess);
 
-	vec4 ambient = texture2D(tex_ambient, texCoord) * light_ambient * mat_ambient;
+	vec4 ambient = texture2D(tex_ambient, texCoord) * light_ambient * mat_ambient  * (max(dot(light_dir, normal), 0.0) + 0.3) * 1.5;
 	vec4 diffuse = texture2D(tex_diffuse, texCoord) * light_diffuse * mat_diffuse * diffuseCoef;
 	vec4 specular = texture2D(tex_specular, texCoord) * light_specular * mat_specular * specularCoef;
 	
-	outColor.rgb = (ambient + diffuse + specular).rgb * (max(dot(light_dir, normal), 0.0) + 0.3) * 1.5;
+	outColor.rgb = (ambient + diffuse + specular).rgb;
+
 	outColor.a = 1.0;
 
-	if(texture2D(tex_alpha, texCoord).r == 0 && texture2D(tex_alpha, texCoord).a == 1)
+	if(texture2D(tex_alpha, texCoord).a == 1)
 	{
-		discard;
+		//outColor.a = texture2D(tex_alpha, texCoord).r;
+
+		if(texture2D(tex_alpha, texCoord).r <= 0.5)
+		{
+				discard;
+		}
 	}
-}";
+}
+";
 
 		static internal string ScreenFragmentShaderSource = @"
 #version 150
@@ -202,17 +209,114 @@ void main()
 out vec4 outColor;
 
 uniform sampler2DMS colorTexture;
-uniform int samples;
+uniform sampler2DMS depthTexture;
 
-void main()
+uniform int samples;
+uniform vec2 cameraRange;
+
+//void main()
+//{
+//	vec3 color = vec3(0.0);
+//	vec3 SSAO = vec3(0.0);
+//	for (int i = 0; i < samples; i++)
+//	{
+//		color += texelFetch(colorTexture, ivec2(gl_FragCoord.xy), i).rgb;
+//		
+//		float curDepth = pow(texelFetch(depthTexture, ivec2(gl_FragCoord.xy), i).r, 128);
+//
+//		float diff = 1.0;
+//		for (int x = -1; x <= 1; x++)
+//		{
+//			for (int y = -1; y <= 1; y++)
+//			{
+//				if(y != 0 && x != 0)
+//				{
+//					diff += abs(pow(texelFetch(depthTexture, ivec2(gl_FragCoord.xy) + ivec2(x, y), i).r, 128) / curDepth) / 8;
+//				}
+//			}
+//		}
+//		SSAO += vec3((((min(diff - 0.5, 1.0) - 0.9) * 5) - 0.2) * 2);
+//	}
+//	
+//	outColor = vec4(SSAO / samples, 1.0);
+//}
+
+
+float readDepth( in ivec2 coord ) 
 {
-	vec3 color = vec3(0.0);
+	float depthPixel = 0.0;
 	for (int i = 0; i < samples; i++)
-	{
-		color += texelFetch(colorTexture, ivec2(gl_FragCoord.xy), i).rgb;
+	{		
+		depthPixel += texelFetch(depthTexture, coord, i).r / samples;
 	}
 	
-	outColor = vec4(color / samples, 1.0);
+	return (2.0 * cameraRange.x) / (cameraRange.y + cameraRange.x - depthPixel * (cameraRange.y - cameraRange.x));	
+}
+
+vec3 readColor( in ivec2 coord ) 
+{
+	vec3 colorPixel = vec3(0.0);
+	for (int i = 0; i < samples; i++)
+	{
+		colorPixel += texelFetch(colorTexture, coord, i).rgb / samples;
+	}
+	return colorPixel;
+}
+ 
+float compareDepths( in float depth1, in float depth2 ) {
+	float aoCap = 1.0;
+	float aoMultiplier=10000.0;
+	float depthTolerance=0.000;
+	float aorange = 100.0;// units in space the AO effect extends to (this gets divided by the camera far range
+	float diff = sqrt( clamp(1.0-(depth1-depth2) / (aorange/(10000.0-10.0)),0.0,1.0) );
+	float ao = min(aoCap,max(0.0,depth1-depth2-depthTolerance) * aoMultiplier) * diff;
+	return ao;
+}
+ 
+void main(void)
+{	
+	float depth = readDepth( ivec2(gl_FragCoord.xy) );
+	float d;
+ 
+	float pw = 1;
+	float ph = 1;
+ 
+	float aoCap = 1.0;
+ 
+	float ao = 0.0;
+ 
+	float aoMultiplier=10000.0;
+ 
+	float depthTolerance = 0.001;
+ 
+	float aoscale=1.0;
+	
+
+	int passes = 4;
+	for(int i = 0; i < passes; i++)
+	{
+		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(pw, ph));
+		ao += compareDepths(depth, d) / aoscale;
+ 
+		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(-pw, ph));
+		ao += compareDepths(depth, d) / aoscale;
+ 
+		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(pw, -ph));
+		ao += compareDepths(depth, d) / aoscale;
+ 
+		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(-pw, -ph));
+		ao += compareDepths(depth, d) / aoscale;
+ 
+		pw *= 2.0;
+		ph *= 2.0;
+		aoMultiplier /= 2.0;
+		aoscale *= 1.2;
+	}
+	ao /= passes * 4.0;
+	ao = clamp(ao, 0.25, 0.5);
+
+	outColor = vec4(1.0 - ao);
+	outColor.rgb *= readColor(ivec2(gl_FragCoord.xy));
 }";
 	}
 }

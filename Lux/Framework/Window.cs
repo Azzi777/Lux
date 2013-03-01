@@ -16,7 +16,7 @@ namespace Lux.Framework
 	{
 		private Engine Parent;
 
-		public Window(Engine parent) : base(1280, 768, new GraphicsMode(32, 24, 8, 0))
+		public Window(Engine parent) : base(1440, 900, new GraphicsMode(32, 24, 8, 0), "Lux", GameWindowFlags.Default)
 		{
 			Parent = parent;
 		}

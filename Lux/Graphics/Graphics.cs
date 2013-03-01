@@ -35,7 +35,7 @@ namespace Lux.Graphics
 			View = Parent.Camera.OpenTKViewMatrix;
 			Projection = OpenTK.Matrix4d.CreatePerspectiveFieldOfView(OpenTK.MathHelper.PiOver3, (float)Parent.Window.Width / Parent.Window.Height, 0.1F, 10000.0F);
 
-			GraphicsContext.CurrentContext.VSync = false;
+			GraphicsContext.CurrentContext.VSync = true;
 
 			TextureShader = new ShaderProgram(ShaderProgram.TextureVertexShaderSource, ShaderProgram.TextureFragmentShaderSource);
 			ScreenShader = new ShaderProgram(ShaderProgram.ScreenFragmentShaderSource);
@@ -88,12 +88,16 @@ namespace Lux.Graphics
 			GL.ClearColor(Color4.BlueViolet);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			GL.Enable(EnableCap.Texture2D);
 			GL.UseProgram(ScreenShader.ID);
 
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorFramebuffer.ColorBufferID);
 			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "colorTexture"), 0);
+
+			GL.ActiveTexture(TextureUnit.Texture1);
+			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorFramebuffer.DepthBufferID);
+			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "depthTexture"), 1);
+			GL.Uniform2(GL.GetUniformLocation(ScreenShader.ID, "cameraRange"), new OpenTK.Vector2(10F, 10000.0F));
 
 			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "samples"), Properties.Settings.Default.Multisamples);
 			
@@ -105,7 +109,6 @@ namespace Lux.Graphics
 				GL.Vertex2(-1, 1);
 			}
 			GL.End();
-			GL.Disable(EnableCap.Texture2D);
 
 			GraphicsContext.CurrentContext.SwapBuffers();
 		}

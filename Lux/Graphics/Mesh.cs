@@ -64,7 +64,7 @@ namespace Lux.Graphics
 
 			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_ambient"), AmbientColor.GetOpenTKEquivalent());
 			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_diffuse"), DiffuseColor.GetOpenTKEquivalent());
-			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_specular"), SpecularColor.GetOpenTKEquivalent());
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_specular"), /*SpecularColor*/DiffuseColor.GetOpenTKEquivalent());
 			GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "mat_shininess"), SpecularCoefficient);
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
