@@ -7,28 +7,30 @@ namespace Lux.Graphics
 {
 	internal struct MeshVertex
 	{
-		MeshPosition Position;
-		MeshNormal Normal;
-		MeshTexCoord TexCoord;
+		public MeshPosition Position;
+		public MeshNormal Normal;
+		public MeshTexCoord TexCoord;
+		public MeshTangent Tangent;
 
-		public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
+		public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord, MeshTangent tangent)
 		{
 			Position = pos;
 			Normal = norm;
 			TexCoord = texcoord;
+			Tangent = tangent;
 		}
 
 		static public int GetSize()
 		{
-			return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
+			return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize() + MeshTangent.GetSize();
 		}
 	}
 
 	internal struct MeshPosition
 	{
-		float X;
-		float Y;
-		float Z;
+		public float X;
+		public float Y;
+		public float Z;
 
 		public MeshPosition(float x, float y, float z)
 		{
@@ -45,9 +47,9 @@ namespace Lux.Graphics
 
 	internal struct MeshNormal
 	{
-		float X;
-		float Y;
-		float Z;
+		public float X;
+		public float Y;
+		public float Z;
 
 		public MeshNormal(float x, float y, float z)
 		{
@@ -62,10 +64,29 @@ namespace Lux.Graphics
 		}
 	}
 
+	internal struct MeshTangent
+	{
+		public float X;
+		public float Y;
+		public float Z;
+
+		public MeshTangent(float x, float y, float z)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+		}
+
+		static public int GetSize()
+		{
+			return 3 * sizeof(float);
+		}
+	}
+
 	internal struct MeshTexCoord
 	{
-		float X;
-		float Y;
+		public float X;
+		public float Y;
 
 		public MeshTexCoord(float x, float y)
 		{

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Text;
 using OpenTK.Graphics;
 
+using Lux.Framework;
 using Lux.Graphics;
 using Lux.Resources.ObjLoader;
 
@@ -30,6 +31,28 @@ namespace Lux.Resources.ObjLoader
 
 				foreach (var face in group.Faces)
 				{
+					Vector3 Q1 = new Vector3(
+						result.Vertices[face.Vertices[1].VertexIndex - 1].X - result.Vertices[face.Vertices[0].VertexIndex - 1].X,
+						result.Vertices[face.Vertices[1].VertexIndex - 1].Y - result.Vertices[face.Vertices[0].VertexIndex - 1].Y,
+						result.Vertices[face.Vertices[1].VertexIndex - 1].Z - result.Vertices[face.Vertices[0].VertexIndex - 1].Z);
+
+					double s1 = result.Textures[face.Vertices[1].TextureIndex - 1].X - result.Textures[face.Vertices[0].TextureIndex - 1].X;
+					double t1 = result.Textures[face.Vertices[1].TextureIndex - 1].Y - result.Textures[face.Vertices[0].TextureIndex - 1].Y;
+
+					Vector3 Q2 = new Vector3(
+						result.Vertices[face.Vertices[2].VertexIndex - 1].X - result.Vertices[face.Vertices[0].VertexIndex - 1].X,
+						result.Vertices[face.Vertices[2].VertexIndex - 1].Y - result.Vertices[face.Vertices[0].VertexIndex - 1].Y,
+						result.Vertices[face.Vertices[2].VertexIndex - 1].Z - result.Vertices[face.Vertices[0].VertexIndex - 1].Z);
+
+					double s2 = result.Textures[face.Vertices[2].TextureIndex - 1].X - result.Textures[face.Vertices[0].TextureIndex - 1].X;
+					double t2 = result.Textures[face.Vertices[2].TextureIndex - 1].Y - result.Textures[face.Vertices[0].TextureIndex - 1].Y;
+
+					double coefficient = 1.0 / (s1 * t2 - s2 * t1);
+					Vector3 sDir = (new Vector3(t2 * Q1.X - t1 * Q2.X, t2 * Q1.Y - t1 * Q2.Y, t2 * Q1.Z - t1 * Q2.Z) * coefficient).Normalized;
+					Vector3 tDir = (new Vector3(s1 * Q2.X - s2 * Q1.X, s1 * Q2.Y - s2 * Q1.Y, s1 * Q2.Z - s2 * Q1.Z) * coefficient).Normalized;
+
+
+					MeshTangent tangent = new MeshTangent((float)sDir.X, (float)sDir.Y, (float)sDir.Z);
 					for (int i = 0; i < face.Vertices.Count; i++)
 					{
 						int vertexPointer = face.Vertices[i].VertexIndex - 1;
@@ -41,16 +64,24 @@ namespace Lux.Resources.ObjLoader
 						meshVertices.Add(new MeshVertex(
 							result.Vertices[vertexPointer],
 							result.Normals[normalPointer],
-							result.Textures[texturePointer]));
+							result.Textures[texturePointer],
+							tangent));
 					}
 
-					if (face.Vertices.Count == 4)
+					if (face.Vertices.Count == 3)
+					{
+					}
+					else if (face.Vertices.Count == 4)
 					{
 						uint vertexPointer1 = meshIndices[meshIndices.Count - 4];
 						uint vertexPointer2 = meshIndices[meshIndices.Count - 2];
 
 						meshIndices.Insert(meshIndices.Count - 1, vertexPointer1);
 						meshIndices.Insert(meshIndices.Count - 1, vertexPointer2);
+					}
+					else
+					{
+						throw new Exception("Only supports triangles or quads");
 					}
 				}
 				Mesh currentMesh = new Mesh(meshIndices.ToArray());

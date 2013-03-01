@@ -12,12 +12,17 @@ namespace Lux.Graphics
 	{
 		public int ID;
 		public int ColorBufferID;
+		public int NormalBufferID;
 		public int DepthBufferID;
 
 		public Framebuffer(int width, int height)
 		{
 			GL.GenTextures(1, out ColorBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorBufferID);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgba, width, height, false);
+
+			GL.GenTextures(1, out NormalBufferID);
+			GL.BindTexture(TextureTarget.Texture2DMultisample, NormalBufferID);
 			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgba, width, height, false);
 
 			GL.GenTextures(1, out DepthBufferID);
@@ -28,6 +33,7 @@ namespace Lux.Graphics
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
 
 			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2DMultisample, ColorBufferID, 0);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2DMultisample, NormalBufferID, 0);
 			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2DMultisample, DepthBufferID, 0);
 			FramebufferErrorCode stanEnum = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 

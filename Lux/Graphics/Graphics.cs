@@ -46,6 +46,8 @@ namespace Lux.Graphics
 		internal void Render(double deltaTime)
 		{
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ColorFramebuffer.ID);
+			GL.DrawBuffer(DrawBufferMode.Back);
+			GL.DrawBuffers(2, new DrawBuffersEnum[] { DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1 });
 
 			GL.ClearColor(Color.CornflowerBlue.GetSystemEquivalent());
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -85,6 +87,7 @@ namespace Lux.Graphics
 
 			// Render to screen
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			GL.DrawBuffer(DrawBufferMode.Back);
 			GL.ClearColor(Color4.BlueViolet);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -95,8 +98,12 @@ namespace Lux.Graphics
 			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "colorTexture"), 0);
 
 			GL.ActiveTexture(TextureUnit.Texture1);
+			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorFramebuffer.NormalBufferID);
+			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "normalTexture"), 1);
+
+			GL.ActiveTexture(TextureUnit.Texture2);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorFramebuffer.DepthBufferID);
-			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "depthTexture"), 1);
+			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "depthTexture"), 2);
 			GL.Uniform2(GL.GetUniformLocation(ScreenShader.ID, "cameraRange"), new OpenTK.Vector2(10F, 10000.0F));
 
 			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "samples"), Properties.Settings.Default.Multisamples);
