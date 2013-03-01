@@ -31,9 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CjClutter.ObjLoader.Loader">
-      <HintPath>..\..\..\..\..\..\Desktop\ObjLoader-master\source\CjClutter.ObjLoader.Test\bin\Debug\CjClutter.ObjLoader.Loader.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\OpenTK\1.0\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
@@ -42,6 +39,7 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="TargaImage, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\TargaImage.dll</HintPath>
@@ -58,6 +56,7 @@
     <Compile Include="Framework\Quaternion.cs" />
     <Compile Include="Framework\Vector2.cs" />
     <Compile Include="Framework\Vector3.cs" />
+    <Compile Include="Graphics\Vertex.cs" />
     <Compile Include="Framework\Window.cs" />
     <Compile Include="Framework\Color.cs" />
     <Compile Include="Graphics\Framebuffer.cs" />
@@ -74,12 +73,16 @@
     <Compile Include="Physics\Physics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\InternalLibraryLinker.cs" />
-    <Compile Include="Resources\ObjLoader.cs" />
+    <Compile Include="Resources\ObjLoader\Face.cs" />
+    <Compile Include="Resources\ObjLoader\Group.cs" />
+    <Compile Include="Resources\ObjLoader\Material.cs" />
+    <Compile Include="Resources\ObjLoader\ObjLoader.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Resources\ObjLoader\ObjModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\OpenTK.dll" />
@@ -93,9 +96,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\CjClutter.ObjLoader.Loader.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

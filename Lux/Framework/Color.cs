@@ -1044,6 +1044,15 @@ namespace Lux.Framework
 		}
 
 		/// <summary>
+		/// Gets the equivalent OpenTK.Graphics.Color4.
+		/// </summary>
+		/// <returns>An OpenTK.Graphics.Color4 representing the same color.</returns>
+		internal OpenTK.Graphics.Color4 GetOpenTKEquivalent()
+		{
+			return new OpenTK.Graphics.Color4( _R, _G, _B, _A);
+		}
+
+		/// <summary>
 		/// Returns a value indicating if this instance is equal to a specified object.
 		/// </summary>
 		/// <param name="obj"></param>

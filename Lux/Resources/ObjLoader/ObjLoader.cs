@@ -6,27 +6,21 @@ using System.Threading;
 using System.Text;
 using OpenTK.Graphics;
 
-using ObjLoader.Loader.Loaders;
- 
 using Lux.Graphics;
+using Lux.Resources.ObjLoader;
 
-namespace Lux.Resources
+namespace Lux.Resources.ObjLoader
 {
-	static internal class ObjLoader2
+	static internal class ObjLoader
 	{
 		internal static Model LoadFromFile(string path)
 		{
-			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-
-			Directory.SetCurrentDirectory("models");
-			var objLoaderFactory = new ObjLoaderFactory();
-			var objLoader = objLoaderFactory.Create(new MaterialStreamProvider());
-
-			var result = objLoader.Load(new FileStream("sponza.obj", FileMode.Open));
+			Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;			
+			ObjModel result = ObjModel.Load(@"models\sponza.obj");
 						
 			List<MeshVertex> meshVertices = new List<MeshVertex>();
 
-			Dictionary<string, Texture> textures = LoadMTLTextures(result.Materials);
+			Dictionary<string, Texture> textures = LoadMTLTextures(result.Materials.Values.ToList());
 
 			List<Mesh> meshes = new List<Mesh>();
 
@@ -36,21 +30,21 @@ namespace Lux.Resources
 
 				foreach (var face in group.Faces)
 				{
-					for (int i = 0; i < face.Count; i++)
+					for (int i = 0; i < face.Vertices.Count; i++)
 					{
-						int vertexPointer = face[i].VertexIndex - 1;
-						int texturePointer = face[i].TextureIndex - 1;
-						int normalPointer = face[i].NormalIndex - 1;
+						int vertexPointer = face.Vertices[i].VertexIndex - 1;
+						int texturePointer = face.Vertices[i].TextureIndex - 1;
+						int normalPointer = face.Vertices[i].NormalIndex - 1;
 
 						meshIndices.Add((uint)meshVertices.Count);
 
 						meshVertices.Add(new MeshVertex(
-							new MeshPosition(result.Vertices[vertexPointer].X, result.Vertices[vertexPointer].Y, result.Vertices[vertexPointer].Z),
-							new MeshNormal(result.Normals[normalPointer].X, result.Normals[normalPointer].Y, result.Normals[normalPointer].Z),
-							new MeshTexCoord(result.Textures[texturePointer].X, result.Textures[texturePointer].Y)));
+							result.Vertices[vertexPointer],
+							result.Normals[normalPointer],
+							result.Textures[texturePointer]));
 					}
 
-					if (face.Count == 4)
+					if (face.Vertices.Count == 4)
 					{
 						uint vertexPointer1 = meshIndices[meshIndices.Count - 4];
 						uint vertexPointer2 = meshIndices[meshIndices.Count - 2];
@@ -69,11 +63,11 @@ namespace Lux.Resources
 			return new Model(meshVertices.ToArray(), meshes.ToArray(), textures.Values.ToArray());
 		}
 
-		static private Dictionary<string, Texture> LoadMTLTextures(IList<ObjLoader.Loader.Data.Material> mtl)
+		static private Dictionary<string, Texture> LoadMTLTextures(List<Material> mtl)
 		{
 			Dictionary<string, Texture> returnValue = new Dictionary<string, Texture>();
 
-			foreach (var material in mtl)
+			foreach (Material material in mtl)
 			{
 				if(material.AlphaTextureMap != null)
 				{
@@ -129,7 +123,7 @@ namespace Lux.Resources
 			return returnValue;
 		}
 
-		static private void ApplyMaterial(Mesh mesh, ObjLoader.Loader.Data.Material material, Dictionary<string, Texture> textures)
+		static private void ApplyMaterial(Mesh mesh, Material material, Dictionary<string, Texture> textures)
 		{
 			if (material.AlphaTextureMap != null && textures.ContainsKey(material.AlphaTextureMap))
 			{
@@ -160,9 +154,9 @@ namespace Lux.Resources
 				mesh.StencilDecal = textures[material.StencilDecalMap];
 			}
 
-			mesh.AmbientColor = new Color4(material.AmbientColor.X, material.AmbientColor.Y, material.AmbientColor.Z, 1.0F);
-			mesh.DiffuseColor = new Color4(material.DiffuseColor.X, material.DiffuseColor.Y, material.DiffuseColor.Z, 1.0F);
-			mesh.SpecularColor = new Color4(material.SpecularColor.X, material.SpecularColor.Y, material.SpecularColor.Z, 1.0F);
+			mesh.AmbientColor = material.AmbientColor;
+			mesh.DiffuseColor = material.DiffuseColor;
+			mesh.SpecularColor = material.SpecularColor;
 			mesh.SpecularCoefficient = material.SpecularCoefficient;
 		}
 	}

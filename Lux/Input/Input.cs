@@ -18,6 +18,25 @@ namespace Lux.Input
 		private Dictionary<MouseEvent, Action<MouseEventArguments>> MouseBinds { get; set; }
 		private KeyboardDevice KeyboardDev { get; set; }
 		private MouseDevice MouseDev { get; set; }
+		private bool _CursorLocked { get; set; }
+		public bool CursorLocked 
+		{ 
+			get { return _CursorLocked; } 
+			set 
+			{ 
+				_CursorLocked = value; 
+				if (_CursorLocked) { System.Windows.Forms.Cursor.Position = Parent.Window.PointToScreen(new System.Drawing.Point(Parent.Window.Width / 2, Parent.Window.Height / 2)); } 
+			} 
+		}
+		private bool _CursorHidden { get; set; }
+		public bool CursorHidden 
+		{ 
+			get { return _CursorHidden; }
+			set
+			{
+				_CursorHidden = value;
+			} 
+		}
 		#endregion
 
 		#region - Engine Interface Methods -
@@ -26,6 +45,7 @@ namespace Lux.Input
 			Parent = parent;
 			KeyHeld = new Dictionary<Key, bool>();
 			KeyBinds = new Dictionary<Key, Tuple<Action, Action, Action>>();
+			CursorLocked = false;
 
 			foreach (Key k in Enum.GetValues(typeof(Key)))
 			{
@@ -61,6 +81,7 @@ namespace Lux.Input
 
 		internal void Update()
 		{
+			if (_CursorHidden) { System.Windows.Forms.Cursor.Hide(); } else { System.Windows.Forms.Cursor.Show(); }
 			foreach (KeyValuePair<Key, bool> kvp in KeyHeld)
 			{
 				if (kvp.Value)
@@ -110,7 +131,20 @@ namespace Lux.Input
 
 		private void MouseMove(object sender, MouseMoveEventArgs e)
 		{
-			MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, MouseDev.Wheel));
+			if (CursorLocked)
+			{
+				if (System.Windows.Forms.Cursor.Position == Parent.Window.PointToScreen(new System.Drawing.Point(Parent.Window.Width / 2, Parent.Window.Height / 2)))
+				{
+					return;
+				}
+
+				MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, MouseDev.Wheel));
+				System.Windows.Forms.Cursor.Position = Parent.Window.PointToScreen(new System.Drawing.Point(Parent.Window.Width / 2, Parent.Window.Height / 2));
+			}
+			else
+			{
+				MouseBinds[MouseEvent.Move](new MouseEventArguments(e.X, e.Y, e.XDelta, e.YDelta, 0, MouseDev.Wheel));
+			}
 		}
 
 		private void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)

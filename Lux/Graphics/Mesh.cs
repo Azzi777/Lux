@@ -6,6 +6,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+using Lux.Framework;
+
 namespace Lux.Graphics
 {
 	internal class Mesh
@@ -15,10 +17,10 @@ namespace Lux.Graphics
 
 		uint[] TempIndices;
 
-		public Color4 AmbientColor;
-		public Color4 DiffuseColor;
-		public Color4 EmissiveColor;
-		public Color4 SpecularColor;
+		public Color AmbientColor;
+		public Color DiffuseColor;
+		public Color EmissiveColor;
+		public Color SpecularColor;
 		public float SpecularCoefficient;
 		public float Transparency;
 		public float ReflectionIndex;
@@ -35,10 +37,10 @@ namespace Lux.Graphics
 		{
 			TempIndices = indices;
 
-			AmbientColor = Color4.Black;
-			DiffuseColor = Color4.Black;
-			EmissiveColor = Color4.Black;
-			SpecularColor = Color4.Black;
+			AmbientColor = Color.Black;
+			DiffuseColor = Color.Black;
+			EmissiveColor = Color.Black;
+			SpecularColor = Color.Black;
 			Transparency = 0.0F;
 			SpecularCoefficient = 10.0F;
 			ReflectionIndex = 1.5F;
@@ -60,9 +62,9 @@ namespace Lux.Graphics
 		{
 			TextureDefine(shaderProgram);
 
-			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_ambient"), AmbientColor);
-			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_diffuse"), DiffuseColor);
-			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_specular"), SpecularColor);
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_ambient"), AmbientColor.GetOpenTKEquivalent());
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_diffuse"), DiffuseColor.GetOpenTKEquivalent());
+			GL.Uniform4(GL.GetUniformLocation(shaderProgram.ID, "mat_specular"), SpecularColor.GetOpenTKEquivalent());
 			GL.Uniform1(GL.GetUniformLocation(shaderProgram.ID, "mat_shininess"), SpecularCoefficient);
 
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
@@ -141,80 +143,6 @@ namespace Lux.Graphics
 				GL.BindTexture(TextureTarget.Texture2D, 0);
 				GL.ActiveTexture(TextureUnit.Texture6);
 				GL.BindTexture(TextureTarget.Texture2D, 0);
-		}
-	}
-
-	internal struct MeshVertex
-	{
-		MeshPosition Position;
-		MeshNormal Normal;
-		MeshTexCoord TexCoord;
-
-		public MeshVertex(MeshPosition pos, MeshNormal norm, MeshTexCoord texcoord)
-		{
-			Position = pos;
-			Normal = norm;
-			TexCoord = texcoord;
-		}
-
-		static public int GetSize()
-		{
-			return MeshPosition.GetSize() + MeshNormal.GetSize() + MeshTexCoord.GetSize();
-		}
-	}
-
-	internal struct MeshPosition
-	{
-		float X;
-		float Y;
-		float Z;
-
-		public MeshPosition(float x, float y, float z)
-		{
-			X = x;
-			Y = y;
-			Z = z;
-		}
-
-		static public int GetSize()
-		{
-			return 3 * sizeof(float);
-		}
-	}
-
-	internal struct MeshNormal
-	{
-		float X;
-		float Y;
-		float Z;
-
-		public MeshNormal(float x, float y, float z)
-		{
-			X = x;
-			Y = y;
-			Z = z;
-		}
-
-		static public int GetSize()
-		{
-			return 3 * sizeof(float);
-		}
-	}
-
-	internal struct MeshTexCoord
-	{
-		float X;
-		float Y;
-
-		public MeshTexCoord(float x, float y)
-		{
-			X = x;
-			Y = y;
-		}
-
-		static public int GetSize()
-		{
-			return 2 * sizeof(float);
 		}
 	}
 }

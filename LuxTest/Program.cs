@@ -27,6 +27,8 @@ namespace Test
 			Entity sponza = engine.CreateEntity(@"models\sponza.obj", "ent.phys");
 			Console.WriteLine("Done!");
 
+			engine.Input.CursorLocked = true;
+			engine.Input.CursorHidden = true;
 			engine.Camera = new Camera(0.0, 0.0, 0.0);
 			engine.Camera.Position = new Vector3(500, 500, 0);
 
@@ -45,11 +47,11 @@ namespace Test
 			engine.Input.BindKeyHold(Key.Escape, () => { engine.Stop(); });
 			engine.Input.BindMouseEvent(MouseEvent.Move, (MouseEventArguments e) => 
 			{
-				engine.Camera.Yaw -= e.DeltaX * 0.03; 
+				engine.Camera.Yaw -= e.DeltaX * 0.005; 
 				if (engine.Camera.Yaw < 0) engine.Camera.Yaw += Math.PI * 2;
 				if (engine.Camera.Yaw >= Math.PI * 2) engine.Camera.Yaw -= Math.PI * 2;
 
-				engine.Camera.Pitch -= e.DeltaY  * 0.03;
+				engine.Camera.Pitch -= e.DeltaY * 0.005;
 				if (engine.Camera.Pitch > Math.PI / 2) engine.Camera.Pitch = Math.PI / 2;
 				if (engine.Camera.Pitch < -Math.PI / 2) engine.Camera.Pitch = -Math.PI / 2;
 			});

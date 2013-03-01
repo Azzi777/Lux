@@ -18,7 +18,7 @@ namespace Lux.Graphics
 		{
 			GL.GenTextures(1, out ColorBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorBufferID);
-			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgba32f, width, height, false);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgba, width, height, false);
 
 			GL.GenTextures(1, out DepthBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, DepthBufferID);

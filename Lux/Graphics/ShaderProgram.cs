@@ -119,7 +119,7 @@ void main()
 	normal = inNormal;
 	texCoord = inTexCoord;
 
-	light_dir = normalize(inPosition - light_pos);
+	light_dir = normalize(vec3(2.0, 3.0, 1.0));//normalize(inPosition - light_pos);
 	eye_dir = normalize(inPosition - eye_pos);
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
@@ -187,7 +187,7 @@ void main()
 	vec4 diffuse = texture2D(tex_diffuse, texCoord) * light_diffuse * mat_diffuse * diffuseCoef;
 	vec4 specular = texture2D(tex_specular, texCoord) * light_specular * mat_specular * specularCoef;
 	
-	outColor.rgb = (ambient + diffuse + specular).rgb * abs(dot(light_dir, normal));
+	outColor.rgb = (ambient + diffuse + specular).rgb * (max(dot(light_dir, normal), 0.0) + 0.3) * 1.5;
 	outColor.a = 1.0;
 
 	if(texture2D(tex_alpha, texCoord).r == 0 && texture2D(tex_alpha, texCoord).a == 1)

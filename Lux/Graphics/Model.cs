@@ -64,7 +64,7 @@ namespace Lux.Graphics
 
 		static public Model LoadFromFile(string path)
 		{
-			return ObjLoader2.LoadFromFile(path);
+			return Lux.Resources.ObjLoader.ObjLoader.LoadFromFile(path);
 		}
 
 		public void Render(Entity entity, ShaderProgram textureShader)
