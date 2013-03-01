@@ -22,5 +22,14 @@ namespace Lux.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        public int Multisamples {
+            get {
+                return ((int)(this["Multisamples"]));
+            }
+        }
     }
 }

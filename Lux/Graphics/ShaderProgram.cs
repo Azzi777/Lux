@@ -202,11 +202,10 @@ void main()
 out vec4 outColor;
 
 uniform sampler2DMS colorTexture;
+uniform int samples;
 
 void main()
 {
-	int samples = 16;
-
 	vec3 color = vec3(0.0);
 	for (int i = 0; i < samples; i++)
 	{

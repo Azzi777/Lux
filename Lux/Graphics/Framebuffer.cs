@@ -16,15 +16,15 @@ namespace Lux.Graphics
 
 		public Framebuffer(int width, int height)
 		{
-			int samples = 16;
+			GL.GetString(StringName.Extensions).Contains("GL_ARB_texture_multisample");
 
 			GL.GenTextures(1, out ColorBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorBufferID);
-			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.Rgb, width, height, false);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.Rgb, width, height, false);
 
 			GL.GenTextures(1, out DepthBufferID);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, DepthBufferID);
-			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, samples, PixelInternalFormat.DepthComponent, width, height, false);
+			GL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample, Properties.Settings.Default.Multisamples, PixelInternalFormat.DepthComponent, width, height, false);
 
 			GL.GenFramebuffers(1, out ID);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);

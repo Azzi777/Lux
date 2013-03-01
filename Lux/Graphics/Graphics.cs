@@ -94,6 +94,8 @@ namespace Lux.Graphics
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2DMultisample, ColorFramebuffer.ColorBufferID);
 			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "colorTexture"), 0);
+
+			GL.Uniform1(GL.GetUniformLocation(ScreenShader.ID, "samples"), Properties.Settings.Default.Multisamples);
 			
 			GL.Begin(BeginMode.Quads);
 			{
