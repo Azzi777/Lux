@@ -29,8 +29,8 @@ namespace Lux.Graphics
 			GL.GenFramebuffers(1, out ID);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
 
-			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, ColorBufferID, 0);
-			GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, DepthBufferID, 0);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2DMultisample, ColorBufferID, 0);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2DMultisample, DepthBufferID, 0);
 			FramebufferErrorCode stanEnum = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

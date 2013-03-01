@@ -52,8 +52,6 @@ namespace Test
 				engine.Camera.Pitch -= e.DeltaY  * 0.03;
 				if (engine.Camera.Pitch > Math.PI / 2) engine.Camera.Pitch = Math.PI / 2;
 				if (engine.Camera.Pitch < -Math.PI / 2) engine.Camera.Pitch = -Math.PI / 2;
-
-				Console.WriteLine(e.X + ", " + e.Y); 
 			});
 			engine.Input.BindMouseEvent(MouseEvent.WheelMove, (MouseEventArguments e) => { Console.WriteLine(e.WheelPosition); });
 
