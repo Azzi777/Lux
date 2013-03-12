@@ -36,35 +36,39 @@ namespace Lux.Resources.ObjLoader
 						result.Vertices[face.Vertices[1].VertexIndex - 1].Y - result.Vertices[face.Vertices[0].VertexIndex - 1].Y,
 						result.Vertices[face.Vertices[1].VertexIndex - 1].Z - result.Vertices[face.Vertices[0].VertexIndex - 1].Z);
 
-					double s1 = result.Textures[face.Vertices[1].TextureIndex - 1].X - result.Textures[face.Vertices[0].TextureIndex - 1].X;
-					double t1 = result.Textures[face.Vertices[1].TextureIndex - 1].Y - result.Textures[face.Vertices[0].TextureIndex - 1].Y;
-
 					Vector3 Q2 = new Vector3(
 						result.Vertices[face.Vertices[2].VertexIndex - 1].X - result.Vertices[face.Vertices[0].VertexIndex - 1].X,
 						result.Vertices[face.Vertices[2].VertexIndex - 1].Y - result.Vertices[face.Vertices[0].VertexIndex - 1].Y,
 						result.Vertices[face.Vertices[2].VertexIndex - 1].Z - result.Vertices[face.Vertices[0].VertexIndex - 1].Z);
 
+					double s1 = result.Textures[face.Vertices[1].TextureIndex - 1].X - result.Textures[face.Vertices[0].TextureIndex - 1].X;
+					double t1 = result.Textures[face.Vertices[1].TextureIndex - 1].Y - result.Textures[face.Vertices[0].TextureIndex - 1].Y;
 					double s2 = result.Textures[face.Vertices[2].TextureIndex - 1].X - result.Textures[face.Vertices[0].TextureIndex - 1].X;
 					double t2 = result.Textures[face.Vertices[2].TextureIndex - 1].Y - result.Textures[face.Vertices[0].TextureIndex - 1].Y;
 
 					double coefficient = 1.0 / (s1 * t2 - s2 * t1);
-					Vector3 sDir = (new Vector3(t2 * Q1.X - t1 * Q2.X, t2 * Q1.Y - t1 * Q2.Y, t2 * Q1.Z - t1 * Q2.Z) * coefficient).Normalized;
-					Vector3 tDir = (new Vector3(s1 * Q2.X - s2 * Q1.X, s1 * Q2.Y - s2 * Q1.Y, s1 * Q2.Z - s2 * Q1.Z) * coefficient).Normalized;
+					Vector3 sDir = new Vector3(t2 * Q1.X - t1 * Q2.X, t2 * Q1.Y - t1 * Q2.Y, t2 * Q1.Z - t1 * Q2.Z) * coefficient;
+					Vector3 tDir = new Vector3(s1 * Q2.X - s2 * Q1.X, s1 * Q2.Y - s2 * Q1.Y, s1 * Q2.Z - s2 * Q1.Z) * coefficient;
 
+					
 
-					MeshTangent tangent = new MeshTangent((float)sDir.X, (float)sDir.Y, (float)sDir.Z);
 					for (int i = 0; i < face.Vertices.Count; i++)
 					{
-						int vertexPointer = face.Vertices[i].VertexIndex - 1;
-						int texturePointer = face.Vertices[i].TextureIndex - 1;
-						int normalPointer = face.Vertices[i].NormalIndex - 1;
+						MeshPosition vertex = result.Vertices[face.Vertices[i].VertexIndex - 1];
+						MeshNormal normal = result.Normals[face.Vertices[i].NormalIndex - 1];
+						MeshTexCoord texture = result.Textures[face.Vertices[i].TextureIndex - 1];
+						
+						Vector3 tempNormal = new Vector3(normal.X, normal.Y, normal.Z);
+						Vector3 tempTangent = (sDir - tempNormal * Vector3.Dot(tempNormal, sDir)).Normalized;
+
+						double handedness = (Vector3.Dot(Vector3.Cross(tempNormal, sDir), tDir) < 0.0) ? -1.0 : 1.0;
+						MeshTangent tangent = new MeshTangent((float)tempTangent.X, (float)tempTangent.Y, (float)tempTangent.Z, (float)handedness);
 
 						meshIndices.Add((uint)meshVertices.Count);
-
 						meshVertices.Add(new MeshVertex(
-							result.Vertices[vertexPointer],
-							result.Normals[normalPointer],
-							result.Textures[texturePointer],
+							vertex,
+							normal,
+							texture,
 							tangent));
 					}
 
@@ -188,7 +192,8 @@ namespace Lux.Resources.ObjLoader
 			mesh.AmbientColor = material.AmbientColor;
 			mesh.DiffuseColor = material.DiffuseColor;
 			mesh.SpecularColor = material.SpecularColor;
-			mesh.SpecularCoefficient = material.SpecularCoefficient;
+			mesh.SpecularCoefficient = (float)Math.Log(material.SpecularCoefficient, 10);
+			mesh.IlluminationModel = material.IlluminationModel;
 		}
 	}
 }

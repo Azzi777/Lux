@@ -20,7 +20,6 @@ namespace Lux.Graphics
 
 		MeshVertex[] TempVertices;
 		Texture[] TempTextures;
-		uint TexturesBufferID;
 
 		public Model(MeshVertex[] vertices, Mesh[] meshes, Texture[] textures)
 		{

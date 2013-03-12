@@ -17,13 +17,14 @@ namespace Lux.Graphics
 
 		uint[] TempIndices;
 
-		public Color AmbientColor;
-		public Color DiffuseColor;
-		public Color EmissiveColor;
-		public Color SpecularColor;
-		public float SpecularCoefficient;
-		public float Transparency;
-		public float ReflectionIndex;
+		public Color AmbientColor { get; set; }
+		public Color DiffuseColor { get; set; }
+		public Color EmissiveColor { get; set; }
+		public Color SpecularColor { get; set; }
+		public float SpecularCoefficient { get; set; }
+		public float Transparency { get; set; }
+		public float ReflectionIndex { get; set; }
+		public int IlluminationModel { get; set; }
 
 		public Texture AmbientTexture { get; set; }
 		public Texture DiffuseTexture { get; set; }

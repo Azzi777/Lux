@@ -85,19 +85,19 @@ namespace Lux.Graphics
 		public void SetVertexFormat()
 		{
 			int posAttrib = GL.GetAttribLocation(ID, "inPosition");
-			GL.VertexAttribPointer(posAttrib, 3, VertexAttribPointerType.Float, false, 44, 0);
+			GL.VertexAttribPointer(posAttrib, 3, VertexAttribPointerType.Float, false, 48, 0);
 			GL.EnableVertexAttribArray(posAttrib);
 
 			int normAttrib = GL.GetAttribLocation(ID, "inNormal");
-			GL.VertexAttribPointer(normAttrib, 3, VertexAttribPointerType.Float, false, 44, 12);
+			GL.VertexAttribPointer(normAttrib, 3, VertexAttribPointerType.Float, false, 48, 12);
 			GL.EnableVertexAttribArray(normAttrib);
 
 			int texAttrib = GL.GetAttribLocation(ID, "inTexCoord");
-			GL.VertexAttribPointer(texAttrib, 2, VertexAttribPointerType.Float, false, 44, 24);
+			GL.VertexAttribPointer(texAttrib, 2, VertexAttribPointerType.Float, false, 48, 24);
 			GL.EnableVertexAttribArray(texAttrib);
 
 			int tangAttrib = GL.GetAttribLocation(ID, "inTangent");
-			GL.VertexAttribPointer(tangAttrib, 3, VertexAttribPointerType.Float, false, 44, 32);
+			GL.VertexAttribPointer(tangAttrib, 4, VertexAttribPointerType.Float, false, 48, 32);
 			GL.EnableVertexAttribArray(tangAttrib);
 		}
 
@@ -106,14 +106,14 @@ namespace Lux.Graphics
 in vec3 inPosition;
 in vec3 inNormal;
 in vec2 inTexCoord;
-in vec3 inTangent;
+in vec4 inTangent;
 
-smooth out vec2 texCoord;
 smooth out vec3 normal;
 smooth out vec3 light_dir;
 smooth out vec3 eye_dir;
-smooth out vec3 tangent;
-smooth out vec3 binormal;
+out vec2 texCoord;
+out vec3 tangent;
+out vec3 binormal;
 
 uniform mat4 mat_world;
 uniform mat4 mat_view;
@@ -125,11 +125,18 @@ void main()
 {
 	normal = inNormal;
 	texCoord = inTexCoord;
-	tangent = inTangent;
+	tangent = inTangent.xyz;
 	binormal = normalize(cross(normal, tangent));
 
-	light_dir = normalize(light_pos - inPosition);
-	eye_dir = normalize(inPosition - eye_pos);
+	if(inTangent.w == -1.0)
+	{
+		binormal *= -1;
+	}
+
+	vec3 vertex_pos = (mat_world * vec4(inPosition, 1.0)).xyz;
+
+	light_dir = normalize(vertex_pos - light_pos);
+	eye_dir = normalize(vertex_pos - eye_pos);
 
 	gl_Position = mat_proj * mat_view * mat_world * vec4(inPosition, 1.0);
 }";
@@ -137,9 +144,9 @@ void main()
 		static internal string TextureFragmentShaderSource = @"
 #version 420
 smooth in vec3 normal;
-smooth in vec3 tangent;
-smooth in vec3 binormal;
-smooth in vec2 texCoord;
+in vec2 texCoord;
+in vec3 tangent;
+in vec3 binormal;
 
 
 uniform sampler2D tex_ambient;
@@ -164,10 +171,10 @@ uniform float mat_shininess;
 
 out vec4 colorOut;
 out vec4 normalOut;
+out vec4 tangentOut;
 
 void main()
 {
-	
 	mat3 rotation = mat3(tangent, binormal, normal);
 
 	vec3 normalBump = normal;
@@ -175,24 +182,30 @@ void main()
 	if(texture2D(tex_bump, texCoord).a != 0.0)
 	{
 		vec3 bump = texture2D(tex_bump, texCoord).rgb * 2.0 - vec3(1.0);
-		normalBump += rotation * bump * 2;
+		normalBump += rotation * bump;
 	}
-	normalBump = normalBump;
-
-	normalOut = vec4(0.0);
 	normalOut.a = 1.0;
 	normalOut.rgb = (normalize(normalBump) / 2 + vec3(0.5));
 
-	vec3 halfVec = normalize(eye_dir + light_dir);
+	tangentOut.a = 1.0;
+	tangentOut.rgb = (normalize(tangent) / 2 + vec3(0.5));
 	
-	float diffuseCoef = max(dot(normalBump, light_dir), 0.0);
-	float specularCoef = pow(clamp(dot(normalBump, halfVec), 0.0, 1.0), mat_shininess);
+	float lambertTerm = max(dot(-light_dir, normalBump), 0.0);
+	float specularCoef = pow(max(dot(reflect(-light_dir, normalBump), eye_dir), 0.0), mat_shininess);
 	
-	vec4 ambient = texture2D(tex_ambient, texCoord) * light_ambient * mat_ambient;
-	vec4 diffuse = texture2D(tex_diffuse, texCoord) * light_diffuse * mat_diffuse * diffuseCoef;
-	vec4 specular = texture2D(tex_specular, texCoord) * light_specular * mat_specular * specularCoef;
+	float attenuation = 0.7;
+	
+	vec4 col_ambient = texture2D(tex_ambient, texCoord);
+	vec4 col_diffuse = texture2D(tex_diffuse, texCoord);
+	vec4 col_specular = texture2D(tex_specular, texCoord);
 
-	colorOut.rgb = (ambient + diffuse + specular).rgb;
+	col_specular = (col_specular.a != 0.0) ? col_specular : vec4(vec3(0.5), 1.0);
+	
+	vec3 ambient = (col_ambient * light_ambient * mat_ambient).rgb;
+	vec3 diffuse = (col_diffuse * light_diffuse * mat_diffuse).rgb * lambertTerm * attenuation;
+	vec3 specular = (col_specular * light_specular * mat_specular).rgb * specularCoef * attenuation * 0.5;
+
+	colorOut.rgb = ambient + diffuse + specular;
 	colorOut.a = 1.0;
 
 	if(texture2D(tex_alpha, texCoord).a == 1)
@@ -212,14 +225,22 @@ void main()
 
 out vec4 outColor;
 
+uniform vec3 eye_pos;
+
 uniform sampler2DMS colorTexture;
 uniform sampler2DMS normalTexture;
+uniform sampler2DMS tangentTexture;
 uniform sampler2DMS depthTexture;
 
 uniform int samples;
+uniform int bufferType;
 uniform vec2 cameraRange;
 
-vec4 readMSPixel( sampler2DMS texture, in ivec2 coord ) 
+uniform mat4 mat_world;
+uniform mat4 mat_view;
+uniform mat4 mat_proj;
+
+vec4 readMSPixel(sampler2DMS texture, ivec2 coord) 
 {
 	vec4 pixel = vec4(0.0);
 	for (int i = 0; i < samples; i++)
@@ -229,66 +250,145 @@ vec4 readMSPixel( sampler2DMS texture, in ivec2 coord )
 	return pixel;
 }
 
-float readDepth( in ivec2 coord ) 
+float translateDepth(float depth) 
 {
-	return (2.0 * cameraRange.x) / (cameraRange.y + cameraRange.x - readMSPixel(depthTexture, coord).r * (cameraRange.y - cameraRange.x));	
+	vec3 nearFarSettings = vec3(cameraRange.y, cameraRange.y - cameraRange.x, cameraRange.y * cameraRange.x);
+	return nearFarSettings.z / (nearFarSettings.x - depth * nearFarSettings.y);
 }
- 
-float compareDepths( in float depth1, in float depth2 ) {
-	float aoCap = 1.0;
-	float aoMultiplier=10000.0;
-	float depthTolerance=0.000;
-	float aorange = 100.0;// units in space the AO effect extends to (this gets divided by the camera far range
-	float diff = sqrt( clamp(1.0-(depth1-depth2) / (aorange/(10000.0-10.0)),0.0,1.0) );
-	float ao = min(aoCap,max(0.0,depth1-depth2-depthTolerance) * aoMultiplier) * diff;
-	return ao;
+
+float readDepth(ivec2 coord) 
+{
+	return translateDepth(readMSPixel(depthTexture, coord).r);
 }
+
+float readDepth(ivec2 coord, int sampleIndex) 
+{
+	return translateDepth(texelFetch(depthTexture, coord, sampleIndex).r);
+}
+
+vec3 WorldPositionFromDepth(vec2 coord, int sampleIndex)
+{
+	float depth = texelFetch(depthTexture, ivec2(coord), sampleIndex).r;
+	vec2 normScrCoord = (coord / vec2(1440, 900)); // 0 to 1 range
+
+	vec4 v_screen = vec4(normScrCoord, depth, 1.0 );
+	vec4 v_homo = inverse(mat_proj) * 2.0 * (v_screen - vec4(0.5));
+	vec3 v_eye = v_homo.xyz / v_homo.w; //transfer from homogeneous coordinates
+
+	return (inverse(mat_view) * vec4(v_eye, 1.0)).xyz;
+}
+
+float random(float start, float end, vec2 seed)
+{
+	//seed *= -abs(dot( seed, (mat_view * inverse(mat_proj) * vec4(seed, eye_pos.zy)).xy));
+	uint n = floatBitsToUint(seed.y * 214013.0 + seed.x * 2531011.0);
+	n = n * (n * n * 15731u + 789221u);
+	n = (n >> 9u) | 0x3F800000u;
+
+	float value = 2.0 - uintBitsToFloat(n);
+
+	value = start + value * (end - start);
+    return value;
+}
+
+#define kernelSize 16
+
+vec3[kernelSize] generateKernel(vec2 coords) 
+{
+	vec3[kernelSize] kernel;
+	for (int i = 0; i < kernelSize; i++) 
+	{
+		kernel[i] = normalize(vec3(random(-1.0, 1.0, coords * 1.03 * (i + 1)), random(-1.0, 1.0, coords * 1.05 * (i + 1)), random(0.0, 1.0, coords * 1.07 * (i + 1))));
+		float scale = float(i) / float(kernelSize);
+		kernel[i] *= (0.1 + scale * scale * 0.9);
+	}
+	return kernel;
+}
+
+float calculateOcclusionFactor(vec2 screenCoords, int sampleIndex) 
+{
+	vec3 position = WorldPositionFromDepth(screenCoords, sampleIndex);
+	vec3 normal = texelFetch(normalTexture, ivec2(screenCoords), sampleIndex).xyz * 2.0 - vec3(1.0);
+	vec3 tangent = texelFetch(tangentTexture, ivec2(screenCoords), sampleIndex).xyz * 2.0 - vec3(1.0);
+	vec3 binormal = normalize(cross(normal, tangent));
+
+	mat3 rotation = mat3(tangent, binormal, normal);
+	
+	vec3[kernelSize] kernel = generateKernel(screenCoords * 1.01 * sampleIndex);
+
+	float radius = 40;
+	float occlusion = 0.0;
+	
+	int validCycles = 1;
+	for(int i = 0; i < kernelSize; i++)
+	{
+		vec3 samplePos = (rotation * kernel[i]) * radius + position;
+
+		vec4 offset =  mat_proj * mat_view * mat_world * vec4(samplePos, 1.0);
+		offset.xy /= offset.w;
+		offset.xy = (offset.xy * 0.5 + 0.5) * vec2(1440, 900);
+
+		if(offset.x < 0.0 || offset.y < 0.0 || offset.x > 1440.0 || offset.y > 900.0)
+		{
+			continue;
+		}
+
+		float sampleDepth = offset.w;
+		float fragmentDepth = readDepth(ivec2(offset.xy), sampleIndex);
+		
+		if(fragmentDepth < sampleDepth && abs(fragmentDepth - sampleDepth) < 40.0)
+		{
+			occlusion += abs(fragmentDepth / sampleDepth);//1.0;
+		}
+		validCycles++;
+	}
+	float pixelDepth = readDepth(ivec2(screenCoords), sampleIndex);
+	if(pixelDepth / cameraRange.y > 0.8) return 1.0;
+	return 1.0 - sqrt(occlusion / float(validCycles));
+}
+
+
+float SSAO(vec2 screenCoords) 
+{
+	float occlusion = 0.0;
+	for (int i = 0; i < samples; i++)
+	{
+		occlusion += calculateOcclusionFactor(screenCoords, i) / samples;
+	}
+	return occlusion;
+}
+
  
 void main(void)
 {	
-	float depth = readDepth( ivec2(gl_FragCoord.xy) );
-	float d;
- 
-	float pw = 1;
-	float ph = 1;
- 
-	float aoCap = 1.0;
- 
-	float ao = 0.0;
- 
-	float aoMultiplier=10000.0;
- 
-	float depthTolerance = 0.001;
- 
-	float aoscale=1.0;
-	
-
-	int passes = 4;
-	for(int i = 0; i < passes; i++)
+	switch(bufferType)
 	{
-		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(pw, ph));
-		ao += compareDepths(depth, d) / aoscale;
- 
-		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(-pw, ph));
-		ao += compareDepths(depth, d) / aoscale;
- 
-		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(pw, -ph));
-		ao += compareDepths(depth, d) / aoscale;
- 
-		d = readDepth( ivec2(gl_FragCoord.xy) + ivec2(-pw, -ph));
-		ao += compareDepths(depth, d) / aoscale;
- 
-		pw *= 2.0;
-		ph *= 2.0;
-		aoMultiplier /= 2.0;
-		aoscale *= 1.2;
-	}
-	ao /= passes * 4.0;
-	ao = clamp(ao, 0.25, 0.5);
+		case 0:
+		{
+			outColor.rgb = readMSPixel(colorTexture, ivec2(gl_FragCoord.xy * 2)).rgb;
+			break;
+		}
 
-	outColor = vec4(1.0 - ao);
-	//outColor.rgb *= readMSPixel(colorTexture, ivec2(gl_FragCoord.xy)).rgb;
-	outColor.rgb = readMSPixel(colorTexture, ivec2(gl_FragCoord.xy)).rgb;
+		case 1:
+		{
+			outColor.rgb = readMSPixel(normalTexture, ivec2(gl_FragCoord.xy * 2 - vec2(1440, 0))).rgb;
+			break;
+		}
+
+		case 2:
+		{
+			outColor.rgb = vec3(SSAO(gl_FragCoord.xy * 2 - vec2(0, 900)));
+			break;
+		}
+
+		case 3:
+		{
+			outColor.rgb = readMSPixel(tangentTexture, ivec2(gl_FragCoord.xy * 2 - vec2(1440, 900))).rgb;
+			//outColor.rgb = vec3(random(0.5, 1.0, gl_FragCoord.xy));
+			//outColor.rgb = readMSPixel(colorTexture, ivec2(gl_FragCoord.xy * 2 - vec2(1440, 900))).rgb * vec3(SSAO(gl_FragCoord.xy * 2 - vec2(1440, 900)));
+			break;
+		}
+	}
 }";
 	}
 }

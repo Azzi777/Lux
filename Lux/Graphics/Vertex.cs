@@ -69,17 +69,19 @@ namespace Lux.Graphics
 		public float X;
 		public float Y;
 		public float Z;
+		public float W;
 
-		public MeshTangent(float x, float y, float z)
+		public MeshTangent(float x, float y, float z, float w)
 		{
 			X = x;
 			Y = y;
 			Z = z;
+			W = w;
 		}
 
 		static public int GetSize()
 		{
-			return 3 * sizeof(float);
+			return 4 * sizeof(float);
 		}
 	}
 
